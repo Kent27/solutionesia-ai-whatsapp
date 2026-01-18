@@ -5,7 +5,7 @@ This directory contains log files for the WhatsApp integration. The logging syst
 1. Store logs per phone number
 2. Automatically rotate logs daily
 3. Retain logs for 30 days
-4. Provide tools for log analysis and management
+4. Automatically clean up old log files
 
 ## Directory Structure
 
@@ -28,32 +28,11 @@ WhatsApp logs include structured data with:
 - Message type (text, image, status, error, etc.)
 - Message data (content, metadata, etc.)
 
-## Log Management
-
-You can use the `log_management.py` utility to manage and analyze logs:
-
-```bash
-# List all phone numbers with logs
-python -m app.utils.log_management list
-
-# Get logs for a specific phone number (last 7 days by default)
-python -m app.utils.log_management get 1234567890 --days 7
-
-# Search logs for a specific query
-python -m app.utils.log_management search "error" --days 7
-
-# Export logs for a specific phone number to a file
-python -m app.utils.log_management export 1234567890 logs_export.json --days 30
-
-# Force cleanup of old log files
-python -m app.utils.log_management cleanup --days 30
-```
-
 ## Log Rotation and Retention
 
 Logs are automatically rotated at midnight each day and kept for 30 days. The rotation is handled by Python's `TimedRotatingFileHandler`.
 
-Additionally, a cleanup function runs periodically to remove any log files older than 30 days as a backup mechanism.
+Additionally, a cleanup function runs automatically when the logging module is imported (on application startup) to remove any log files older than 30 days as a backup mechanism.
 
 ## Programmatic Access
 
@@ -93,5 +72,4 @@ If you encounter issues with the logging system:
 
 1. Check that the log directories exist and are writable
 2. Verify that the application has permission to create and modify files
-3. Check disk space if logs are not being written
-4. Use the cleanup utility if log files are consuming too much space 
+3. Check disk space if logs are not being written 

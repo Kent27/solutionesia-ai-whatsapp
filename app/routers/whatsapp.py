@@ -44,10 +44,21 @@ async def set_customer_chat_status(request: ChatStatusRequest):
         if not customer:
             raise HTTPException(status_code=404, detail="Customer not found")
         
-        # Set the chat status
+        # Set the chat status in Google Sheets
         success = await set_chat_status(request.phone_number, request.status)
         if not success:
             raise HTTPException(status_code=500, detail="Failed to update chat status")
+            
+        # DUPLICATE FUNCTIONALITY FOR MARIADB CONTACTS
+        try:
+            from ..services.contact_service import ContactService
+            contact_service = ContactService()
+            
+            # Also update the chat status in the contacts table
+            await contact_service.set_chat_status(request.phone_number, request.status)
+        except Exception as e:
+            # Log but don't fail if the database operation fails
+            logger.error(f"Error updating chat status in contacts table: {str(e)}")
         
         return {
             "status": "success",

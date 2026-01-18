@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Any
 from ..utils.google_sheets import set_chat_status
+from ..functions.alert_functions import alert_admin
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +18,30 @@ async def enable_live_chat(phone_number: str) -> Dict[str, Any]:
     try:
         # Normalize phone number format
         phone_number = phone_number.strip()
+        if not phone_number.startswith("+"):
+            # Add + if not present for international format
+            if phone_number.startswith("62"):
+                phone_number = "+" + phone_number
+            elif phone_number.startswith("0"):
+                # Convert local format to international
+                phone_number = "+62" + phone_number[1:]
         
         success = await set_chat_status(phone_number, "Live Chat")
         
         if success:
             logger.info(f"Live Chat mode enabled for {phone_number}")
+            
+            # Alert admin about Live Chat activation
+            await alert_admin(
+                message=f"Live Chat mode has been enabled for a customer",
+                severity="info",
+                context={
+                    "phone_number": phone_number,
+                    "action": "Live Chat Enabled",
+                    "status": "Active"
+                }
+            )
+            
             return {
                 "status": "success",
                 "message": "Live Chat mode has been enabled. Your messages will now be handled by a human agent."

@@ -11,6 +11,7 @@ from ..services.openai_service import OpenAIAssistantService
 from ..models.assistant_models import ChatRequest, ChatMessage, ContentItem, ImageFileContent, TextContent
 from ..utils.google_sheets import check_customer_exists, update_customer, insert_customer, update_thread_id
 from ..utils.logging_utils import log_whatsapp_message
+from ..database.mysql import MariaDBClient
 import asyncio
 from datetime import datetime, timedelta
 from collections import OrderedDict
@@ -60,7 +61,7 @@ class MessageCache:
 
 class WhatsAppService:
     def __init__(self):
-        self.api_version = "v22.0"
+        self.api_version = "v24.0"
         self.phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
         self.access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
         self.base_url = f"https://graph.facebook.com/{self.api_version}"
@@ -70,6 +71,9 @@ class WhatsAppService:
             "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
         }
         self.base_openai_url = "https://api.openai.com/v1"
+        
+        # Initialize database client
+        self.db = MariaDBClient()
 
         # Initialize message cache for deduplication
         self.message_cache = MessageCache()
@@ -134,7 +138,6 @@ class WhatsAppService:
                 raise ValueError("File upload verification timed out")
                 
         except Exception as e:
-            logger.error(f"Error uploading file to OpenAI: {str(e)}")
             raise
 
     async def process_webhook(self, request: WhatsAppWebhookRequest) -> Dict[str, Any]:
@@ -194,7 +197,12 @@ class WhatsAppService:
                         }
                     }
             except Exception as e:
-                logger.error(f"Error validating message timestamp: {str(e)}")
+                log_whatsapp_message(
+                    phone_number=messages[0].from_,
+                    message_type="error",
+                    message_data={"error": f"Error validating message timestamp: {str(e)}"},
+                    direction="system"
+                )
                 # Continue processing even if timestamp validation fails
             
             # Check for duplicate messages to prevent double processing
@@ -248,10 +256,83 @@ class WhatsAppService:
                 # Fetch the newly created customer record
                 customer = await check_customer_exists(messages[0].from_)
                 if not customer:
-                    logger.error(f"Failed to create customer record for {messages[0].from_}")
+                    log_whatsapp_message(
+                        phone_number=messages[0].from_,
+                        message_type="error",
+                        message_data={"error": f"Failed to create customer record for {messages[0].from_}"},
+                        direction="system"
+                    )
+            
+            # DUPLICATE FUNCTIONALITY FOR MARIADB CONTACTS TABLE
+            # Check if contact exists in MariaDB contacts table
+            try:
+                from ..services.contact_service import ContactService
+                contact_service = ContactService()
+                
+                # Look for an existing contact with this phone number
+                query = """
+                    SELECT id, name, user_id 
+                    FROM contacts 
+                    WHERE phone_number = %s
+                """
+                pool = await self.db.get_pool()
+                async with pool.acquire() as conn:
+                    async with conn.cursor() as cur:
+                        await cur.execute(query, (messages[0].from_,))
+                        contact_record = await cur.fetchone()
+                
+                if not contact_record:
+                    logger.info(f"Contact Does Not Exist in Database - Creating new contact record for: {contact.profile.name} ({messages[0].from_})")
+                    
+                    # Insert the new WhatsApp contact (user_id is NULL - these are WhatsApp customers, not app users)
+                    insert_query = """
+                        INSERT INTO contacts (name, phone_number, user_id, created_at)
+                        VALUES (%s, %s, NULL, NOW())
+                    """
+                    pool = await self.db.get_pool()
+                    async with pool.acquire() as conn:
+                        async with conn.cursor() as cur:
+                            await cur.execute(insert_query, (
+                                contact.profile.name,
+                                messages[0].from_,
+                            ))
+                    
+                    logger.info(f"Successfully created contact record in database for {messages[0].from_}")
+                else:
+                    logger.debug(f"Contact already exists in database: {contact_record[1]} ({messages[0].from_})")
+                    
+                    # Update the contact name if it's different
+                    if contact_record[1] != contact.profile.name:
+                        update_query = """
+                            UPDATE contacts
+                            SET name = %s, updated_at = NOW()
+                            WHERE id = %s
+                        """
+                        pool = await self.db.get_pool()
+                        async with pool.acquire() as conn:
+                            async with conn.cursor() as cur:
+                                await cur.execute(update_query, (
+                                    contact.profile.name,
+                                    contact_record[0]
+                                ))
+                        logger.info(f"Updated contact name in database for {messages[0].from_}")
+                        
+            except Exception as e:
+                log_whatsapp_message(
+                    phone_number=messages[0].from_,
+                    message_type="error",
+                    message_data={"error": f"Error checking/updating contact in database: {str(e)}"},
+                    direction="system"
+                )
+                # Continue processing even if the database operation fails
+                # This ensures the Google Sheets functionality remains intact
             
             # Check if customer is in "Live Chat" mode - if so, skip AI processing
-            if customer and customer.get('chat_status') == "Live Chat":
+            # But don't skip if it's the admin's number
+            admin_phone = os.getenv('ADMIN_WHATSAPP_NUMBER')
+            is_admin = admin_phone and messages[0].from_ == admin_phone
+            
+            if customer and customer.get('chat_status') == "Live Chat" and not is_admin:
                 logger.info(f"Customer {messages[0].from_} is in Live Chat mode. Skipping AI processing.")
                 log_whatsapp_message(
                     phone_number=messages[0].from_,
@@ -260,6 +341,14 @@ class WhatsAppService:
                     direction="system"
                 )
                 return {"status": "success", "message": "Live Chat mode active - AI processing skipped"}
+            elif customer and customer.get('chat_status') == "Live Chat" and is_admin:
+                logger.info(f"Admin {messages[0].from_} is in Live Chat mode but will still get AI responses.")
+                log_whatsapp_message(
+                    phone_number=messages[0].from_,
+                    message_type="system",
+                    message_data={"message": "Admin override - AI processing continues despite Live Chat mode"},
+                    direction="system"
+                )
             
             # Process all messages
             content_items: List[Dict] = []
@@ -316,7 +405,12 @@ class WhatsAppService:
                             })
                             
                     except Exception as e:
-                        logger.error(f"Error processing image: {str(e)}")
+                        log_whatsapp_message(
+                            phone_number=messages[0].from_,
+                            message_type="error",
+                            message_data={"error": f"Error processing image: {str(e)}"},
+                            direction="system"
+                        )
                         await self.send_message(
                             to=messages[0].from_,
                             message="Maaf, terjadi kesalahan saat memproses gambar. Mohon coba lagi."
@@ -334,9 +428,26 @@ class WhatsAppService:
             ))
             
             # Update thread_id if needed
+            # TODO: Might need to update thread if its outdated
             if customer and thread_id != chat_response.thread_id:
                 logger.info(f"Updating thread_id for customer {customer['phone']} from {thread_id} to {chat_response.thread_id}")
                 await update_thread_id(customer, chat_response.thread_id)
+                
+                # DUPLICATE FUNCTIONALITY FOR MARIADB CONTACTS
+                try:
+                    from ..services.contact_service import ContactService
+                    contact_service = ContactService()
+                    
+                    # Also update the thread_id in the contacts table
+                    await contact_service.update_thread_id(customer['phone'], chat_response.thread_id)
+                except Exception as e:
+                    log_whatsapp_message(
+                        phone_number=customer['phone'],
+                        message_type="error",
+                        message_data={"error": f"Error updating thread_id in contacts table: {str(e)}"},
+                        direction="system"
+                    )
+                    # Continue processing even if the database operation fails
             
             # Send response
             if chat_response.messages:
@@ -365,23 +476,59 @@ class WhatsAppService:
                             message=response_text
                         )
                     else:
-                        logger.error("No text content found in assistant response")
+                        log_whatsapp_message(
+                            phone_number=messages[0].from_,
+                            message_type="error",
+                            message_data={
+                                "error": "No text content found in assistant response",
+                                "debug": {
+                                    "status": chat_response.status,
+                                    "has_assistant_message": assistant_message is not None,
+                                    "content_type": type(assistant_message.content).__name__ if assistant_message else None,
+                                    "content_value": str(assistant_message.content) if assistant_message else None
+                                }
+                            },
+                            direction="system"
+                        )
                 else:
-                    logger.error("No assistant message or content found")
+                    log_whatsapp_message(
+                        phone_number=messages[0].from_,
+                        message_type="error",
+                        message_data={
+                            "error": "No assistant message or content found",
+                            "debug": {
+                                "status": chat_response.status,
+                                "messages_count": len(chat_response.messages) if chat_response.messages else 0,
+                                "has_assistant_message": assistant_message is not None,
+                                "message_roles": [msg.role for msg in chat_response.messages] if chat_response.messages else [],
+                                "run_error": chat_response.error
+                            }
+                        },
+                        direction="system"
+                    )
             else:
-                logger.error("No messages in chat response")
+                log_whatsapp_message(
+                    phone_number=messages[0].from_,
+                    message_type="error",
+                    message_data={
+                        "error": "No messages in chat response",
+                        "debug": {
+                            "status": chat_response.status,
+                            "thread_id": chat_response.thread_id
+                        }
+                    },
+                    direction="system"
+                )
             
             return {"status": "success"}
             
         except Exception as e:
-            logger.error(f"Error processing webhook: {str(e)}")
-            
             # Log the error with the phone number if available
             if 'messages' in locals() and messages and hasattr(messages[0], 'from_'):
                 log_whatsapp_message(
                     phone_number=messages[0].from_,
                     message_type="error",
-                    message_data={"error": str(e)},
+                    message_data={"error": f"Error processing webhook: {str(e)}"},
                     direction="system"
                 )
             
@@ -446,19 +593,22 @@ class WhatsAppService:
                 )
                 
                 if response.status_code != 200:
-                    logger.error(f"Error sending message: {response.text}")
+                    log_whatsapp_message(
+                        phone_number=to,
+                        message_type="error",
+                        message_data={"error": f"Error sending message: {response.text}"},
+                        direction="system"
+                    )
                     return {"status": "error", "message": response.text}
                 
                 return {"status": "success", "data": response_data}
                 
         except Exception as e:
-            logger.error(f"Error sending message: {str(e)}")
-            
             # Log the error
             log_whatsapp_message(
                 phone_number=to,
                 message_type="error",
-                message_data={"error": str(e)},
+                message_data={"error": f"Error sending message: {str(e)}"},
                 direction="system"
             )
             

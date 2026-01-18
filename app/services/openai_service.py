@@ -1,5 +1,6 @@
 import logging
 import os
+from app.utils.logging_utils import log_whatsapp_message
 from openai import OpenAI
 import json
 import importlib
@@ -7,9 +8,10 @@ from ..models.assistant_models import (
     AssistantConfig, AssistantResponse, ChatMessage, ContentItem, ImageFileContent, RunStatus, TextContent, 
     ThreadMessages, ChatRequest, ChatResponse
 )
-from ..models.manychat_models import ManyChatRequest, ManyChatResponse
+# ManyChat functionality moved to backup folder
+# from ..backup.manychat_models import ManyChatRequest, ManyChatResponse
 from ..models.whatsapp_models import WhatsAppChatRequest, WhatsAppResponse
-from .manychat_service import ManyChatService
+# from ..backup.manychat_service import ManyChatService
 import asyncio
 from functools import partial
 from typing import Optional, Dict, Any
@@ -224,21 +226,30 @@ class OpenAIAssistantService:
                     pass
 
             # Add message with proper content
-            await self._run_sync(
-                self.client.beta.threads.messages.create,
-                thread_id=thread_id,
-                role="user",
-                content=message_content  # Use the extracted or original content
-            )
+            try:
+                await self._run_sync(
+                    self.client.beta.threads.messages.create,
+                    thread_id=thread_id,
+                    role="user",
+                    content=message_content  # Use the extracted or original content
+                )
+            except Exception as e:
+                logger.error(f"Error creating message in thread {thread_id}: {str(e)}")
+                raise ValueError(f"Failed to create message: {str(e)}")
 
             # Run assistant
-            run = await self._run_sync(
-                self.client.beta.threads.runs.create,
-                thread_id=thread_id,
-                assistant_id=request.assistant_id
-            )
+            try:
+                run = await self._run_sync(
+                    self.client.beta.threads.runs.create,
+                    thread_id=thread_id,
+                    assistant_id=request.assistant_id
+                )
+            except Exception as e:
+                logger.error(f"Error creating run for assistant {request.assistant_id} in thread {thread_id}: {str(e)}")
+                raise ValueError(f"Failed to create assistant run: {str(e)}")
 
             # Wait for completion or handle function calls
+            run_error = None
             while True:
                 run_status = await self._run_sync(
                     self.client.beta.threads.runs.retrieve,
@@ -272,6 +283,13 @@ class OpenAIAssistantService:
                     continue
                 
                 if run_status.status in ["completed", "failed", "expired"]:
+                    # Capture error details if run failed
+                    if run_status.status == "failed" and hasattr(run_status, 'last_error'):
+                        run_error = {
+                            "code": getattr(run_status.last_error, 'code', None),
+                            "message": getattr(run_status.last_error, 'message', None)
+                        }
+                        logger.error(f"OpenAI assistant run failed: {run_error}")
                     break
                     
                 await asyncio.sleep(1)
@@ -309,7 +327,8 @@ class OpenAIAssistantService:
             return ChatResponse(
                 thread_id=thread_id,
                 messages=processed_messages,
-                status=run_status.status
+                status=run_status.status,
+                error=run_error if run_error else None
             )
 
         except Exception as e:
@@ -338,97 +357,98 @@ class OpenAIAssistantService:
         thread = await self._run_sync(self.client.beta.threads.create)
         return thread.id
 
-    async def manychat(self, request: ManyChatRequest) -> ManyChatResponse:
-        """Handle ManyChat request asynchronously"""
-        try:
-            # Validate initial request
-            if not request.subscriber_id and not request.phone_number:
-                raise ValueError("Either subscriber_id or phone_number must be provided")
-
-            # Create thread if not provided
-            thread_id = request.thread_id
-            if not thread_id:
-                thread_id = await self._create_initial_thread()
-
-            # Create a new request object with updated thread_id
-            request_data = request.model_dump()
-            request_data['thread_id'] = thread_id
-            new_request = ManyChatRequest(**request_data)
-
-            # Start background processing
-            asyncio.create_task(self._process_manychat_background(new_request))
-
-            # Return immediate response with thread_id
-            return ManyChatResponse(
-                assistant_id=request.assistant_id,
-                subscriber_id=request.subscriber_id,
-                thread_id=thread_id,
-                status="processing"
-            )
-
-        except Exception as e:
-            raise ValueError(f"ManyChat request error: {str(e)}")
-
-    async def _process_manychat_background(self, request: ManyChatRequest) -> None:
-        """Background task to process ManyChat request"""
-        try:
-            manychat_service = ManyChatService()
-            phone_number = request.phone_number
-            customer_name = request.customer_name
-
-            if not phone_number:
-                raise ValueError("Phone number is required")
-
-            # Check if customer exists in Google Sheets
-            customer = await check_customer_exists(phone_number)
-            if customer:
-                # Update name if different
-                if customer_name and customer_name != customer.get('name'):
-                    await update_customer_name(phone_number, customer_name)
-            else:
-                # Insert new customer
-                await insert_customer(phone_number, customer_name)
-
-            # Handle chat with OpenAI Assistant using existing thread_id
-            chat_response = await self.chat(ChatRequest(
-                assistant_id=request.assistant_id,
-                thread_id=request.thread_id,  # Now guaranteed to have a thread_id
-                messages=[ChatMessage(
-                    role=request.messages[-1].role,
-                    content=json.dumps({
-                        "content": request.messages[-1].content,
-                        "metadata": {
-                            "phone_number": phone_number,
-                            "customer_name": customer_name
-                        }
-                    })
-                )]
-            ))
-
-            # Get the assistant's response
-            assistant_message = next((msg for msg in chat_response.messages if msg.role == "assistant"), None)
-            if assistant_message and assistant_message.content:
-                ai_response = assistant_message.content[0].text
-                
-                # Set custom field with the response
-                if request.subscriber_id:
-                    await manychat_service.set_custom_field(
-                        subscriber_id=request.subscriber_id,
-                        field_id=os.getenv("MANYCHAT_RESPONSE_FIELD_ID"),
-                        value=ai_response
-                    )
-
-                # Trigger ManyChat flow with the response
-                await manychat_service.trigger_flow(
-                    subscriber_id=request.subscriber_id,
-                    flow_id=os.getenv("MANYCHAT_RESPONSE_FLOW_ID"),
-                    custom_fields={
-                        "ai_response": ai_response
-                    }
-                )
-
-        except Exception as e:
-            print(f"Background task error: {str(e)}")
+    # ManyChat functionality moved to backup folder
+    # async def manychat(self, request: ManyChatRequest) -> ManyChatResponse:
+    #     """Handle ManyChat request asynchronously"""
+    #     try:
+    #         # Validate initial request
+    #         if not request.subscriber_id and not request.phone_number:
+    #             raise ValueError("Either subscriber_id or phone_number must be provided")
+    #
+    #         # Create thread if not provided
+    #         thread_id = request.thread_id
+    #         if not thread_id:
+    #             thread_id = await self._create_initial_thread()
+    #
+    #         # Create a new request object with updated thread_id
+    #         request_data = request.model_dump()
+    #         request_data['thread_id'] = thread_id
+    #         new_request = ManyChatRequest(**request_data)
+    #
+    #         # Start background processing
+    #         asyncio.create_task(self._process_manychat_background(new_request))
+    #
+    #         # Return immediate response with thread_id
+    #         return ManyChatResponse(
+    #             assistant_id=request.assistant_id,
+    #             subscriber_id=request.subscriber_id,
+    #             thread_id=thread_id,
+    #             status="processing"
+    #         )
+    #
+    #     except Exception as e:
+    #         raise ValueError(f"ManyChat request error: {str(e)}")
+    #
+    # async def _process_manychat_background(self, request: ManyChatRequest) -> None:
+    #     """Background task to process ManyChat request"""
+    #     try:
+    #         manychat_service = ManyChatService()
+    #         phone_number = request.phone_number
+    #         customer_name = request.customer_name
+    #
+    #         if not phone_number:
+    #             raise ValueError("Phone number is required")
+    #
+    #         # Check if customer exists in Google Sheets
+    #         customer = await check_customer_exists(phone_number)
+    #         if customer:
+    #             # Update name if different
+    #             if customer_name and customer_name != customer.get('name'):
+    #                 await update_customer_name(phone_number, customer_name)
+    #         else:
+    #             # Insert new customer
+    #             await insert_customer(phone_number, customer_name)
+    #
+    #         # Handle chat with OpenAI Assistant using existing thread_id
+    #         chat_response = await self.chat(ChatRequest(
+    #             assistant_id=request.assistant_id,
+    #             thread_id=request.thread_id,  # Now guaranteed to have a thread_id
+    #             messages=[ChatMessage(
+    #                 role=request.messages[-1].role,
+    #                 content=json.dumps({
+    #                     "content": request.messages[-1].content,
+    #                     "metadata": {
+    #                         "phone_number": phone_number,
+    #                         "customer_name": customer_name
+    #                     }
+    #                 })
+    #             )]
+    #         ))
+    #
+    #         # Get the assistant's response
+    #         assistant_message = next((msg for msg in chat_response.messages if msg.role == "assistant"), None)
+    #         if assistant_message and assistant_message.content:
+    #             ai_response = assistant_message.content[0].text
+    #             
+    #             # Set custom field with the response
+    #             if request.subscriber_id:
+    #                 await manychat_service.set_custom_field(
+    #                     subscriber_id=request.subscriber_id,
+    #                     field_id=os.getenv("MANYCHAT_RESPONSE_FIELD_ID"),
+    #                     value=ai_response
+    #                 )
+    #
+    #             # Trigger ManyChat flow with the response
+    #             await manychat_service.trigger_flow(
+    #                 subscriber_id=request.subscriber_id,
+    #                 flow_id=os.getenv("MANYCHAT_RESPONSE_FLOW_ID"),
+    #                 custom_fields={
+    #                     "ai_response": ai_response
+    #                 }
+    #             )
+    #
+    #     except Exception as e:
+    #         print(f"Background task error: {str(e)}")
 
     async def whatsapp_chat(self, request: WhatsAppChatRequest) -> WhatsAppResponse:
         """Handle WhatsApp chat request asynchronously"""

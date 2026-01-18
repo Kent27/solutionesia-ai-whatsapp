@@ -4,7 +4,8 @@ from ..services.openai_service import OpenAIAssistantService
 from ..services.action_service import ActionService
 from typing import Dict
 from functools import lru_cache
-from ..models.manychat_models import ManyChatRequest, ManyChatResponse
+# ManyChat functionality moved to backup folder
+# from ..backup.manychat_models import ManyChatRequest, ManyChatResponse
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
@@ -112,7 +113,7 @@ async def list_actions(
 ):
     return action_service.list_actions()
 
-# Simplified chat endpoint
+# Simplified chat endpoint (handles full flow)
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
@@ -137,13 +138,14 @@ async def update_assistant(assistant_id: str, update_data: AssistantUpdateReques
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/manychat", response_model=ManyChatResponse)
-async def handle_manychat(request: ManyChatRequest):
-    try:
-        service = OpenAIAssistantService()
-        response = await service.manychat(request)
-        return response
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+# ManyChat functionality moved to backup folder
+# @router.post("/manychat", response_model=ManyChatResponse)
+# async def handle_manychat(request: ManyChatRequest):
+#     try:
+#         service = OpenAIAssistantService()
+#         response = await service.manychat(request)
+#         return response
+#     except ValueError as e:
+#         raise HTTPException(status_code=400, detail=str(e))
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

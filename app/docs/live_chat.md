@@ -71,14 +71,7 @@ To return a customer to normal AI processing:
 
 ## Logging
 
-All messages from customers in Live Chat mode are still logged in the system. You can view these logs using the logging tools:
-
-```bash
-# View logs for a specific phone number
-python -m app.utils.log_management get 6281234567890 --days 7
-```
-
-The logs will include a system message indicating that AI processing was skipped due to Live Chat mode.
+All messages from customers in Live Chat mode are still logged in the system. Logs are automatically managed and cleaned up by the logging system. The logs will include a system message indicating that AI processing was skipped due to Live Chat mode.
 
 ## Troubleshooting
 

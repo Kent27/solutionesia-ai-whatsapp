@@ -1,0 +1,95 @@
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from ..models.auth_models import UserLogin, UserRegister, UserResponse, AuthResponse
+from ..services.auth_service import AuthService
+from typing import Dict, Any
+import logging
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+auth_service = AuthService()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+@router.post("/login", response_model=AuthResponse)
+async def login(user_data: UserLogin) -> Dict[str, Any]:
+    """
+    Authenticate a user and return a JWT token
+    """
+    try:
+        result = await auth_service.authenticate_user(
+            email=user_data.email,
+            password=user_data.password
+        )
+        
+        if not result:
+            raise HTTPException(
+                status_code=401,
+                detail="Incorrect email or password"
+            )
+            
+        return result
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error during login: {str(e)}"
+        )
+
+@router.post("/register", response_model=AuthResponse)
+async def register(user_data: UserRegister) -> Dict[str, Any]:
+    """
+    Register a new user
+    """
+    try:
+        logger.info(f"Registration request received for email: {user_data.email}")
+        
+        # Check if user already exists
+        existing_user = await auth_service.get_user_by_email(user_data.email)
+        if existing_user:
+            logger.warning(f"Registration failed: User already exists with email {user_data.email}")
+            raise HTTPException(
+                status_code=400,
+                detail="User with this email already exists"
+            )
+            
+        # Create new user
+        logger.info(f"Creating new user with email: {user_data.email}")
+        result = await auth_service.create_user(
+            name=user_data.name,
+            email=user_data.email,
+            password=user_data.password
+        )
+        
+        if not result:
+            logger.error(f"Failed to create user: {user_data.email}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to create user"
+            )
+            
+        # Log in the newly created user
+        logger.info(f"User created successfully, attempting authentication: {user_data.email}")
+        auth_result = await auth_service.authenticate_user(
+            email=user_data.email,
+            password=user_data.password
+        )
+        
+        if not auth_result:
+            logger.error(f"Failed to authenticate newly created user: {user_data.email}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to authenticate new user"
+            )
+            
+        logger.info(f"User registration completed successfully: {user_data.email}")
+        return auth_result
+    except HTTPException as he:
+        logger.warning(f"HTTP exception during registration: {str(he)}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during registration: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error during registration: {str(e)}"
+        ) 

@@ -99,3 +99,4 @@ class ChatResponse(BaseModel):
     thread_id: str
     messages: Optional[List[ChatMessage]] = None
     status: str
+    error: Optional[Dict[str, Any]] = None

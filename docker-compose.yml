@@ -1,4 +1,26 @@
 services:
+  mariadb:
+    image: mariadb:latest
+    container_name: solutionesia_mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MARIADB_PASSWORD}
+      - MYSQL_DATABASE=${MARIADB_DATABASE:-solutionesia_ai_whatsapp}
+      - MYSQL_USER=${MARIADB_USER:-root}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./app/database/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "${MARIADB_HOST_PORT:-3307}:${MARIADB_PORT:-3306}"
+    networks:
+      - solutionesia_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   docgen:
     build:
       context: .
@@ -12,21 +34,29 @@ services:
       - ./config/credentials:/app/config/credentials
     environment:
       - PYTHONUNBUFFERED=1
+      - MARIADB_HOST=mariadb
     networks:
       - solutionesia_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
 
-  # performance-test:
-  #   build: .
-  #   environment:
-  #     - OPENAI_API_KEY=${OPENAI_API_KEY}
-  #     - TEST_ITERATIONS=10
-  #     - TEST_TYPE=thread_creation
-  #   volumes:
-  #     - .:/app
-  #   command: python -m tests.test_concurrent_performance
-  #   depends_on:
-  #     - docgen    # Changed from 'api' to 'docgen'
+# performance-test:
+#   build: .
+#   environment:
+#     - OPENAI_API_KEY=${OPENAI_API_KEY}
+#     - TEST_ITERATIONS=10
+#     - TEST_TYPE=thread_creation
+#   volumes:
+#     - .:/app
+#   command: python -m tests.test_concurrent_performance
+#   depends_on:
+#     - docgen    # Changed from 'api' to 'docgen'
 
 networks:
   solutionesia_network:
     external: true
+
+volumes:
+  mariadb_data:

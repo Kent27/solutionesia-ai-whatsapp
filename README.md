@@ -1,5 +1,5 @@
-# ai-doc-gen
-Generate a docx report based on the provided template
+# Solutionesia AI WhatsApp
+AI-powered WhatsApp chatbot with document generation capabilities
 
 ## Setup
 
