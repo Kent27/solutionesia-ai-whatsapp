@@ -1,0 +1,628 @@
+{
+  "info": {
+    "_postman_id": "010539ee-434c-4d42-a703-ecffd0a15783",
+    "name": "AI Solutionesia",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "3664570"
+  },
+  "item": [
+    {
+      "name": "Docgen",
+      "item": [
+        {
+          "name": "http://127.0.0.1:8085/text-to-doc",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Api-Key",
+                "value": "ik+Qc5PeVQ9ni0NxzS0jdg==sWjKXkaD2tfQB6Ug",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "ASEAN Statements and Communiqués\n\nASEAN Chair’s Statement on the Ceasefire Agreement between Israel and Hamas in Gaza\n• Source: https://asean.org/asean-chairs-statement-on-the-ceasefire-agreement-between-israel-and-hamas-in-gaza/\n• Date: December 1, 2024\n• Summary: ASEAN welcomed the ceasefire agreement between Israel and Hamas, expressing hope for lasting peace and stability in the region. The statement emphasized the importance of dialogue and the two-state solution in resolving the conflict.\n\nMedia Release of the Nineteenth Meeting of the Conference of the Parties to the ASEAN Agreement on Transboundary Haze Pollution (COP-19)\n• Source: https://asean.org/media-release-of-the-nineteenth-meeting-of-the-conference-of-the-parties-to-the-asean-agreement-on-transboundary-haze-pollution-cop-19/\n• Date: December 15, 2024\n• Summary: ASEAN member states convened to address transboundary haze pollution, noting the expected La Niña conditions and their potential impact. The meeting reaffirmed commitments to implement preventive measures and strengthen regional cooperation to mitigate haze pollution.\n\nASEAN Economic Integration Brief Highlights Regional Synergy and Services Facilitation\n• Source: https://asean.org/asean-economic-integration-brief-highlights-regional-synergy-and-services-facilitation/\n• Date: December 16, 2024\n• Summary: The ASEAN Secretariat released the 16th issue of the ASEAN Economic Integration Brief, focusing on regional synergy and services facilitation. The publication underscores ASEAN’s efforts in enhancing economic integration and cooperation among member states.\nIndonesia and ASEAN Secretariat News\n\nSecretary-General of ASEAN Receives Letter of Credence from Ambassador of the Netherlands to ASEAN\n• Source: https://asean.org/secretary-general-of-asean-receives-letter-of-credence-from-ambassador-of-the-netherlands-to-asean/\n• Date: December 9, 2024\n• Summary: Ambassador Marc Gerritsen presented his letter of credence to Secretary-General Dr. Kao Kim Hourn, marking the strengthening of ASEAN-Netherlands relations and mutual commitment to enhanced cooperation.\n\nSecretary-General of ASEAN Attends Handover Ceremony of the CPR Chairmanship from Lao PDR to Malaysia\n• Source: https://asean.org/secretary-general-of-asean-attends-handover-ceremony-of-the-cpr-chairmanship-from-lao-pdr-to-malaysia/\n• Date: December 12, 2024\n• Summary: The Committee of Permanent Representatives to ASEAN (CPR) held its final meeting under Lao PDR’s chairmanship, with the chairmanship officially handed over to Malaysia. Secretary-General Dr. Kao Kim Hourn attended the ceremony, highlighting the continuity of ASEAN’s collaborative efforts.\n\nSecretary-General of ASEAN Meets with Minister of Defense of Japan\n• Source: https://asean.org/secretary-general-of-asean-meets-with-minister-of-defense-of-japan/\n• Date: December 18, 2024\n• Summary: Dr. Kao Kim Hourn met with Japan’s Minister of Defense, H.E. Gen Nakatani, in Tokyo to discuss strengthening ASEAN-Japan defense cooperation and regional security initiatives.\n\nASEAN Ministers to Discuss Myanmar at Thailand Meeting, Indonesia Says\n• Source: https://www.reuters.com/world/asia-pacific/asean-ministers-discuss-myanmar-thailand-meeting-indonesia-says-2024-12-05/\n• Date: December 5, 2024\n• Summary: ASEAN foreign ministers planned to meet in Thailand to address the ongoing crisis in Myanmar, focusing on the implementation of ASEAN’s five-point consensus plan. Indonesia’s foreign minister was expected to attend the meeting, aiming to foster dialogue and stability in Myanmar.\n\nThailand to Host Two Regional Meetings Focused on Myanmar This Week\n• Source: https://www.reuters.com/world/asia-pacific/thailand-host-two-regional-meetings-focused-myanmar-this-week-2024-12-16/\n• Date: December 16, 2024\n• Summary: Thailand announced plans to host two regional meetings on Myanmar, with participation from ASEAN members and neighboring countries. The discussions aimed to address border security, transnational crime, and the implementation of ASEAN’s peace plan for Myanmar.\n\nClimate Change\n\nSoutheast Asia Needs to Boost Investments Five-Fold by 2035 to Meet Climate Goals, IEA Says\n• Source: https://www.reuters.com/sustainability/southeast-asia-needs-boost-investments-five-fold-by-2035-meet-climate-goals-iea-2024-10-21/\n• Date: October 21, 2024\n• Summary: The International Energy Agency (IEA) reported that Southeast Asia must increase clean energy investments to $190 billion annually by 2035—approximately five times the current level—to achieve its climate objectives. The report emphasizes the need for strategies to reduce emissions from the region’s young fleet of coal-fired power plants and highlights the challenges posed by rapid economic expansion on energy security and climate goals.\n\nCambodia to Boost Power Import Capacity by Over 50% in Next Two Years\n• Source: https://www.reuters.com/business/energy/cambodia-boost-power-import-capacity-by-over-50-next-two-years-2024-10-21/\n• Date: October 21, 2024\n• Summary: Cambodia plans to increase its power import capacity by over 600 megawatts (MW) from neighboring countries Laos, Vietnam, and Thailand within the next two years. This move aims to enhance the nation’s access to clean energy sources, including solar and hydro power, and underscores the potential for greater interconnection in Southeast Asia’s energy sector.\n\nSingapore to Co-Fund Carbon Capture and Storage Studies at Power Plants to Aid Net-Zero Emissions Target\n• Source: https://www.reuters.com/business/energy/singapore-co-fund-ccs-studies-some-power-plants-aid-net-zero-emissions-target-2024-10-21/\n• Date: October 21, 2024\n• Summary: Singapore’s Energy Market Authority announced plans to co-fund feasibility studies on carbon capture and storage (CCS) technologies for selected power plants. The initiative focuses on both post-combustion carbon capture for combined-cycle gas turbines and pre-combustion carbon capture to produce hydrogen, aligning with Singapore’s goal to achieve net-zero emissions by 2050.\n\nGermany’s PNE Seeks Vietnam Approval for $4.6 Billion Offshore Wind Project\n• Source: https://www.reuters.com/business/energy/germanys-pne-seeks-vietnam-approval-46-bln-offshore-wind-project-2024-10-23/\n• Date: October 23, 2024\n• Summary: German company PNE AG is seeking approval from the Vietnamese government to develop a $4.6 billion offshore wind farm in Binh Dinh province. The proposed project aims to contribute 2,000 megawatts of renewable energy, supporting Vietnam’s target of achieving 6 gigawatts of offshore wind capacity by 2030.\n\nInaction on Emissions Could Cut Developing Asia’s GDP by 17% by 2070, ADB Says\n• Source: https://www.reuters.com/world/asia-pacific/inaction-emissions-could-cut-developing-asias-gdp-by-17-by-2070-adb-says-2024-10-31/\n• Date: October 31, 2024\n• Summary: The Asian Development Bank warns that without significant emission reduction efforts, developing Asia could face a 17% decrease in gross domestic product by 2070. The report highlights the urgency for more ambitious climate actions to mitigate the severe economic and environmental impacts of climate change in the region.\n\nTrafficking in Persons/Migrant Workers\n\nASEAN Strengthens Cooperation Against Trafficking in Persons\n• Source: https://www.unodc.org/roseap/en/2024/12/asean-trafficking-in-persons/story.html\n• Date: December 11, 2024\n• Summary: The ASEAN Senior Officials Meeting on Transnational Crime (SOMTC), supported by the Australian Government-funded ASEAN-ACT and UNODC, convened in Bangkok to enhance regional collaboration against human trafficking. The meeting coincided with the launch of the 2024 UNODC Trafficking in Persons Report, underscoring ASEAN’s commitment to combating this issue.\n\nPair Arrested in Indonesia for Human Trafficking of Bangladeshi Migrants\n• Source: https://www.theaustralian.com.au/world/pair-on-human-trafficking-charge/news-story/6b297c783fda1d054f1b99949a97de0d\n• Date: December 15, 2024\n• Summary: Indonesian authorities in North Sumatra arrested a husband and wife accused of trafficking 12 Bangladeshi men. The migrants were promised work in Australia but were instead held captive and told they would be sent to Malaysia for an additional fee. The suspects face charges with potential penalties ranging from three to 15 years in prison.\n\nMigrant Workers Vital to Regional Prosperity but Vulnerable to Exploitation\n• Source: https://www.instagram.com/ausmissionasean/p/DDtTLgGST0E/\n• Date: December 20, 2024\n• Summary: The Australian Mission to ASEAN highlighted the essential role migrant workers play in regional development. However, it also emphasized their vulnerability to trafficking and forced labor, calling for strengthened protections and policies to safeguard their rights.\nHumanitarian and Disaster Responses\n\nASEAN Weekly Disaster Update: December 23–29, 2024\n• Source: https://reliefweb.int/report/indonesia/asean-weekly-disaster-update-week-52-23-29-december-2024\n• Date: December 29, 2024\n• Summary: During the fifty-second week of 2024, the ASEAN region experienced 36 significant disasters, including floods, landslides, and wind-related events. The report provides detailed information on the affected areas and the response efforts undertaken.\n\nASEAN Ministers to Discuss Myanmar at Thailand Meeting\n• Source: https://www.reuters.com/world/asia-pacific/asean-ministers-discuss-myanmar-thailand-meeting-indonesia-says-2024-12-05/\n• Date: December 5, 2024\n• Summary: ASEAN foreign ministers planned to meet in Thailand to address the ongoing crisis in Myanmar, focusing on the implementation of ASEAN’s five-point consensus plan. The meeting aimed to foster dialogue and stability in Myanmar amidst escalating humanitarian needs.\n\nHumanitarian Needs Escalate in Myanmar\n• Source: https://www.unocha.org/publications/report/myanmar/statement-resident-and-humanitarian-coordinator-myanmar-ai-13-december-2024\n• Date: December 13, 2024\n• Summary: The United Nations reported that humanitarian needs in Myanmar have reached unprecedented levels, with an estimated 19.9 million people requiring assistance in 2025. The crisis is driven by ongoing conflict, natural disasters, epidemics, and economic decline, significantly impacting vulnerable populations.\n\nLessons from 2024 for ASEAN Disaster Management\n• Source: https://www.preventionweb.net/publication/emergency-preparedness-and-contingency-planning-lessons-2024-asean-disaster-management\n• Date: December 20, 2024\n• Summary: A report analyzing the disasters of 2024 highlighted evolving trends in the risk landscape and underscored the need for adaptive strategies in ASEAN’s disaster management. The study emphasized the importance of coordinated early warning systems and the critical need for comprehensive emergency preparedness.\n\nASEAN–Dialogue Partners\n\nASEAN and Brazil Deepen Cooperation through Practical Initiatives\n• Source: https://asean.org/asean-brazil-to-deepen-ties-through-tangible-cooperation/\n• Date: December 10, 2024\n• Summary: ASEAN and Brazil have agreed to strengthen their Sectoral Dialogue Partnership by focusing on key areas of mutual interest, including trade, investment, and sustainable development. This collaboration aims to enhance economic ties and promote shared growth between the regions.\n\nASEAN and Türkiye Review Sectoral Dialogue Partnership\n• Source: https://asean.org/wp-content/uploads/2024/12/Overview-ASEAN-Turkiye-Sectoral-Dialogue-Partnership-as-of-Dec-2024.pdf\n• Date: December 15, 2024\n• Summary: ASEAN and Türkiye conducted a comprehensive review of their Sectoral Dialogue Partnership, discussing progress in various cooperation areas and exploring new opportunities to enhance collaboration in trade, culture, and technology.\n\nASEAN and Australia Celebrate 50 Years of Dialogue Partnership\n• Source: https://aseanaustralia.pmc.gov.au/50th-anniversary/\n• Date: December 20, 2024\n• Summary: Marking the 50th anniversary of their dialogue partnership, ASEAN and Australia celebrated decades of cooperation contributing to regional security and prosperity. The partnership has evolved to address complex challenges, reinforcing a commitment to a peaceful and stable region.\n\nASEAN and Republic of Korea Strengthen Ties\n• Source: https://www.mfaic.gov.kh/Posts/2024-12-27-Embassy-News-The-Royal-Embassy-of-Cambodia-to-the-Federal-Republic-of-Germany-hosted-ASEAN-Republic-of-Korea-Work-15-12-59\n• Date: December 19, 2024\n• Summary: The Royal Embassy of Cambodia in Germany hosted an ASEAN-Republic of Korea Working Lunch, bringing together ambassadors and officials to discuss enhancing cooperation in various sectors, including trade, education, and cultural exchange.\n\nASEAN Participates in International Conference on Research Infrastructure\n• Source: https://www.eeas.europa.eu/delegations/association-southeast-asian-nations-asean/asean-icri-2024-exploring-new-opportunities-research-infrastructure-collaboration_en\n• Date: December 6, 2024\n• Summary: The ASEAN Regional Research Infrastructure Task Force made its debut at the International Conference on Research Infrastructure in Brisbane, Australia. This participation underscores ASEAN’s commitment to advancing research collaboration and innovation with global partners.\nLabour Migration\n\nUN Network on Migration Launches Thailand Migration Report 2024\n• Source: https://thailand.un.org/en/285916-united-nations-network-migration-launches-thailand-migration-report-2024\n• Date: December 13, 2024\n• Summary: The United Nations Network on Migration in Thailand released the Thailand Migration Report 2024, providing a comprehensive analysis of migration trends, policies, and the experiences of migrants in Thailand. The report highlights key challenges and opportunities for sustainable development.\n\nILO Highlights Role of Care Work in ASEAN Labour Migration\n• Source: https://www.ilo.org/publications/care-work-and-labour-migration-asean\n• Date: December 5, 2024\n• Summary: The International Labour Organization published a paper discussing how care needs can be met through labour migration in ASEAN. It reviews tools and challenges in facilitating labour mobility and recommends measures to protect and promote the rights of migrant care workers.\n\nUN Women Calls for Proposals to Support Women Migrant Workers\n• Source: https://asiapacific.unwomen.org/en/programme-implementation/2024/11/unw-ap-tha-cfp-2024-001-ensuring-decent-work-and-reducing-vulnerabilities-for-women-and-children-in-the-context-of-labour-migration-in-southeast-asia\n• Date: December 24, 2024\n• Summary: As part of the PROTECT project, UN Women announced a call for proposals to support activities ensuring decent work and reducing vulnerabilities for women and children in the context of labour migration in Southeast Asia. The initiative aims to enhance protections and coordinated services for migrant women.\n\nEvaluation of TRIANGLE in ASEAN Program Shows Positive Outcomes\n• Source: https://www.dfat.gov.au/publications/publications/tripartite-action-enhance-contribution-labour-migration-growth-and-development-triangle-asean-program-final-independent-evaluation-2024\n• Date: December 18, 2024\n• Summary: An independent evaluation of the TRIANGLE in ASEAN program found significant achievements in strengthening migration governance and empowering migrant workers. The program’s strong partnerships and trust-building efforts have been key drivers of its success.\n\nMalaysia and Bangladesh Discuss Labour Migration Issues\n• Source: [https://www.reuters.com/world/asia-pacific/malaysia-pm-visit-bangladesh-focus-labour-\n\nEconomic and Political Affairs\n\nMalaysia PM Appoints Thai Heavyweight Thaksin as Adviser on ASEAN\n• Source: https://www.reuters.com/world/asia-pacific/malaysia-pm-appoints-thai-heavyweight-thaksin-his-adviser-asean-2024-12-16/\n• Date: December 16, 2024\n• Summary: Malaysian Prime Minister Anwar Ibrahim appointed former Thai Prime Minister Thaksin Shinawatra as his personal adviser for Malaysia’s upcoming chairmanship of ASEAN in 2025. Thaksin’s role will be informal, leveraging his extensive experience to support ASEAN initiatives.\n\nThailand Hosts Regional Talks to Address Myanmar’s Civil War\n• Source: https://apnews.com/article/8b05c4d22e649f88aeb1449bcf052710\n• Date: December 19, 2024\n• Summary: Thailand convened regional discussions in Bangkok to seek solutions to Myanmar’s ongoing civil conflict, which began after the military coup in February 2021. The talks included Myanmar and neighboring countries such as Laos, China, India, Bangladesh, and Thailand, aiming to foster dialogue and peace in the region.\n\nASEAN Economic Integration Brief Highlights Regional Synergy and Services Facilitation\n• Source: https://asean.org/asean-economic-integration-brief-highlights-regional-synergy-and-services-facilitation/\n• Date: December 16, 2024\n• Summary: The 16th issue of the ASEAN Economic Integration Brief (AEIB) was released, focusing on regional synergy and services facilitation. The publication underscores ASEAN’s efforts in enhancing economic integration and cooperation among member states.\n\nASEAN Aims to Conclude Digital Economy Pact Negotiations in 2025\n• Source: https://www.iseas.edu.sg/library/blog/daily-news-alerts/241220/\n• Date: December 20, 2024\n• Summary: ASEAN announced its goal to finalize negotiations for a digital economy pact by 2025. This initiative seeks to strengthen digital integration and cooperation among member countries, enhancing the region’s competitiveness in the global digital landscape.\n\nStartup ASEAN Platform Launched to Strengthen Regional Ecosystem\n• Source: https://www.facebook.com/aseansecretariat/posts/in-december-2024-startup-asean-a-new-platform-was-introduced-aimed-at-strengthen/995688729253061/\n• Date: December 2024\n• Summary: In December 2024, “Startup ASEAN,” a new platform aimed at strengthening the startup ecosystem across Southeast Asia, was introduced. The initiative seeks to foster innovation, collaboration, and growth among startups within the ASEAN region.\n\nLeave No One Behind (LNOB) Initiatives\n\nASEAN Enhances Connectivity and Resilience in 2024\n• Source: https://asean.org/wp-content/uploads/2024/12/ASEAN-AR-2024_e-pub_web.pdf\n• Date: December 2024\n• Summary: ASEAN implemented initiatives to enhance the safety of local communities in Cambodia, Lao PDR, and Thailand through landmine clearance and other resilience-building efforts. These actions align with the LNOB principle by addressing the needs of vulnerable populations and promoting inclusive development.\n\nASEAN Strengthens Cooperation Against Trafficking in Persons\n• Source: https://www.unodc.org/roseap/en/2024/12/asean-trafficking-in-persons/story.html\n• Date: December 11, 2024\n• Summary: The ASEAN Senior Officials Meeting on Transnational Crime (SOMTC), supported by the Australian Government-funded ASEAN-ACT and UNODC, convened in Bangkok to enhance regional collaboration against human trafficking. The meeting coincided with the launch of the 2024 UNODC Trafficking in Persons Report, underscoring ASEAN’s commitment to combating this issue and ensuring no one is left behind.\n\nASEAN Key Figures 2024 Report Highlights Regional Progress\n• Source: https://www.aseanstats.org/wp-content/uploads/2024/12/AKF2024.v1.pdf\n• Date: December 2024\n• Summary: The “ASEAN Key Figures 2024” report provides a snapshot of key statistical indicators reflecting the region’s dynamic transformation and progress. The publication highlights ASEAN’s efforts in various sectors, contributing to inclusive development and aligning with the LNOB agenda.\n\n\n\n\n",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8085/text-to-doc",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8085",
+              "path": [
+                "text-to-doc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "https://docgen.solutionesia.com/text-to-doc",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Api-Key",
+                "value": "ik+Qc5PeVQ9ni0NxzS0jdg==sWjKXkaD2tfQB6Ug",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "ASEAN Statements and Communiqués\n\nASEAN Chair’s Statement on the Ceasefire Agreement between Israel and Hamas in Gaza\n• Source: https://asean.org/asean-chairs-statement-on-the-ceasefire-agreement-between-israel-and-hamas-in-gaza/\n• Date: December 1, 2024\n• Summary: ASEAN welcomed the ceasefire agreement between Israel and Hamas, expressing hope for lasting peace and stability in the region. The statement emphasized the importance of dialogue and the two-state solution in resolving the conflict.\n\nMedia Release of the Nineteenth Meeting of the Conference of the Parties to the ASEAN Agreement on Transboundary Haze Pollution (COP-19)\n• Source: https://asean.org/media-release-of-the-nineteenth-meeting-of-the-conference-of-the-parties-to-the-asean-agreement-on-transboundary-haze-pollution-cop-19/\n• Date: December 15, 2024\n• Summary: ASEAN member states convened to address transboundary haze pollution, noting the expected La Niña conditions and their potential impact. The meeting reaffirmed commitments to implement preventive measures and strengthen regional cooperation to mitigate haze pollution.\n\nASEAN Economic Integration Brief Highlights Regional Synergy and Services Facilitation\n• Source: https://asean.org/asean-economic-integration-brief-highlights-regional-synergy-and-services-facilitation/\n• Date: December 16, 2024\n• Summary: The ASEAN Secretariat released the 16th issue of the ASEAN Economic Integration Brief, focusing on regional synergy and services facilitation. The publication underscores ASEAN’s efforts in enhancing economic integration and cooperation among member states.\nIndonesia and ASEAN Secretariat News\n\nSecretary-General of ASEAN Receives Letter of Credence from Ambassador of the Netherlands to ASEAN\n• Source: https://asean.org/secretary-general-of-asean-receives-letter-of-credence-from-ambassador-of-the-netherlands-to-asean/\n• Date: December 9, 2024\n• Summary: Ambassador Marc Gerritsen presented his letter of credence to Secretary-General Dr. Kao Kim Hourn, marking the strengthening of ASEAN-Netherlands relations and mutual commitment to enhanced cooperation.\n\nSecretary-General of ASEAN Attends Handover Ceremony of the CPR Chairmanship from Lao PDR to Malaysia\n• Source: https://asean.org/secretary-general-of-asean-attends-handover-ceremony-of-the-cpr-chairmanship-from-lao-pdr-to-malaysia/\n• Date: December 12, 2024\n• Summary: The Committee of Permanent Representatives to ASEAN (CPR) held its final meeting under Lao PDR’s chairmanship, with the chairmanship officially handed over to Malaysia. Secretary-General Dr. Kao Kim Hourn attended the ceremony, highlighting the continuity of ASEAN’s collaborative efforts.\n\nSecretary-General of ASEAN Meets with Minister of Defense of Japan\n• Source: https://asean.org/secretary-general-of-asean-meets-with-minister-of-defense-of-japan/\n• Date: December 18, 2024\n• Summary: Dr. Kao Kim Hourn met with Japan’s Minister of Defense, H.E. Gen Nakatani, in Tokyo to discuss strengthening ASEAN-Japan defense cooperation and regional security initiatives.\n\nASEAN Ministers to Discuss Myanmar at Thailand Meeting, Indonesia Says\n• Source: https://www.reuters.com/world/asia-pacific/asean-ministers-discuss-myanmar-thailand-meeting-indonesia-says-2024-12-05/\n• Date: December 5, 2024\n• Summary: ASEAN foreign ministers planned to meet in Thailand to address the ongoing crisis in Myanmar, focusing on the implementation of ASEAN’s five-point consensus plan. Indonesia’s foreign minister was expected to attend the meeting, aiming to foster dialogue and stability in Myanmar.\n\nThailand to Host Two Regional Meetings Focused on Myanmar This Week\n• Source: https://www.reuters.com/world/asia-pacific/thailand-host-two-regional-meetings-focused-myanmar-this-week-2024-12-16/\n• Date: December 16, 2024\n• Summary: Thailand announced plans to host two regional meetings on Myanmar, with participation from ASEAN members and neighboring countries. The discussions aimed to address border security, transnational crime, and the implementation of ASEAN’s peace plan for Myanmar.\n\nClimate Change\n\nSoutheast Asia Needs to Boost Investments Five-Fold by 2035 to Meet Climate Goals, IEA Says\n• Source: https://www.reuters.com/sustainability/southeast-asia-needs-boost-investments-five-fold-by-2035-meet-climate-goals-iea-2024-10-21/\n• Date: October 21, 2024\n• Summary: The International Energy Agency (IEA) reported that Southeast Asia must increase clean energy investments to $190 billion annually by 2035—approximately five times the current level—to achieve its climate objectives. The report emphasizes the need for strategies to reduce emissions from the region’s young fleet of coal-fired power plants and highlights the challenges posed by rapid economic expansion on energy security and climate goals.\n\nCambodia to Boost Power Import Capacity by Over 50% in Next Two Years\n• Source: https://www.reuters.com/business/energy/cambodia-boost-power-import-capacity-by-over-50-next-two-years-2024-10-21/\n• Date: October 21, 2024\n• Summary: Cambodia plans to increase its power import capacity by over 600 megawatts (MW) from neighboring countries Laos, Vietnam, and Thailand within the next two years. This move aims to enhance the nation’s access to clean energy sources, including solar and hydro power, and underscores the potential for greater interconnection in Southeast Asia’s energy sector.\n\nSingapore to Co-Fund Carbon Capture and Storage Studies at Power Plants to Aid Net-Zero Emissions Target\n• Source: https://www.reuters.com/business/energy/singapore-co-fund-ccs-studies-some-power-plants-aid-net-zero-emissions-target-2024-10-21/\n• Date: October 21, 2024\n• Summary: Singapore’s Energy Market Authority announced plans to co-fund feasibility studies on carbon capture and storage (CCS) technologies for selected power plants. The initiative focuses on both post-combustion carbon capture for combined-cycle gas turbines and pre-combustion carbon capture to produce hydrogen, aligning with Singapore’s goal to achieve net-zero emissions by 2050.\n\nGermany’s PNE Seeks Vietnam Approval for $4.6 Billion Offshore Wind Project\n• Source: https://www.reuters.com/business/energy/germanys-pne-seeks-vietnam-approval-46-bln-offshore-wind-project-2024-10-23/\n• Date: October 23, 2024\n• Summary: German company PNE AG is seeking approval from the Vietnamese government to develop a $4.6 billion offshore wind farm in Binh Dinh province. The proposed project aims to contribute 2,000 megawatts of renewable energy, supporting Vietnam’s target of achieving 6 gigawatts of offshore wind capacity by 2030.\n\nInaction on Emissions Could Cut Developing Asia’s GDP by 17% by 2070, ADB Says\n• Source: https://www.reuters.com/world/asia-pacific/inaction-emissions-could-cut-developing-asias-gdp-by-17-by-2070-adb-says-2024-10-31/\n• Date: October 31, 2024\n• Summary: The Asian Development Bank warns that without significant emission reduction efforts, developing Asia could face a 17% decrease in gross domestic product by 2070. The report highlights the urgency for more ambitious climate actions to mitigate the severe economic and environmental impacts of climate change in the region.\n\nTrafficking in Persons/Migrant Workers\n\nASEAN Strengthens Cooperation Against Trafficking in Persons\n• Source: https://www.unodc.org/roseap/en/2024/12/asean-trafficking-in-persons/story.html\n• Date: December 11, 2024\n• Summary: The ASEAN Senior Officials Meeting on Transnational Crime (SOMTC), supported by the Australian Government-funded ASEAN-ACT and UNODC, convened in Bangkok to enhance regional collaboration against human trafficking. The meeting coincided with the launch of the 2024 UNODC Trafficking in Persons Report, underscoring ASEAN’s commitment to combating this issue.\n\nPair Arrested in Indonesia for Human Trafficking of Bangladeshi Migrants\n• Source: https://www.theaustralian.com.au/world/pair-on-human-trafficking-charge/news-story/6b297c783fda1d054f1b99949a97de0d\n• Date: December 15, 2024\n• Summary: Indonesian authorities in North Sumatra arrested a husband and wife accused of trafficking 12 Bangladeshi men. The migrants were promised work in Australia but were instead held captive and told they would be sent to Malaysia for an additional fee. The suspects face charges with potential penalties ranging from three to 15 years in prison.\n\nMigrant Workers Vital to Regional Prosperity but Vulnerable to Exploitation\n• Source: https://www.instagram.com/ausmissionasean/p/DDtTLgGST0E/\n• Date: December 20, 2024\n• Summary: The Australian Mission to ASEAN highlighted the essential role migrant workers play in regional development. However, it also emphasized their vulnerability to trafficking and forced labor, calling for strengthened protections and policies to safeguard their rights.\nHumanitarian and Disaster Responses\n\nASEAN Weekly Disaster Update: December 23–29, 2024\n• Source: https://reliefweb.int/report/indonesia/asean-weekly-disaster-update-week-52-23-29-december-2024\n• Date: December 29, 2024\n• Summary: During the fifty-second week of 2024, the ASEAN region experienced 36 significant disasters, including floods, landslides, and wind-related events. The report provides detailed information on the affected areas and the response efforts undertaken.\n\nASEAN Ministers to Discuss Myanmar at Thailand Meeting\n• Source: https://www.reuters.com/world/asia-pacific/asean-ministers-discuss-myanmar-thailand-meeting-indonesia-says-2024-12-05/\n• Date: December 5, 2024\n• Summary: ASEAN foreign ministers planned to meet in Thailand to address the ongoing crisis in Myanmar, focusing on the implementation of ASEAN’s five-point consensus plan. The meeting aimed to foster dialogue and stability in Myanmar amidst escalating humanitarian needs.\n\nHumanitarian Needs Escalate in Myanmar\n• Source: https://www.unocha.org/publications/report/myanmar/statement-resident-and-humanitarian-coordinator-myanmar-ai-13-december-2024\n• Date: December 13, 2024\n• Summary: The United Nations reported that humanitarian needs in Myanmar have reached unprecedented levels, with an estimated 19.9 million people requiring assistance in 2025. The crisis is driven by ongoing conflict, natural disasters, epidemics, and economic decline, significantly impacting vulnerable populations.\n\nLessons from 2024 for ASEAN Disaster Management\n• Source: https://www.preventionweb.net/publication/emergency-preparedness-and-contingency-planning-lessons-2024-asean-disaster-management\n• Date: December 20, 2024\n• Summary: A report analyzing the disasters of 2024 highlighted evolving trends in the risk landscape and underscored the need for adaptive strategies in ASEAN’s disaster management. The study emphasized the importance of coordinated early warning systems and the critical need for comprehensive emergency preparedness.\n\nASEAN–Dialogue Partners\n\nASEAN and Brazil Deepen Cooperation through Practical Initiatives\n• Source: https://asean.org/asean-brazil-to-deepen-ties-through-tangible-cooperation/\n• Date: December 10, 2024\n• Summary: ASEAN and Brazil have agreed to strengthen their Sectoral Dialogue Partnership by focusing on key areas of mutual interest, including trade, investment, and sustainable development. This collaboration aims to enhance economic ties and promote shared growth between the regions.\n\nASEAN and Türkiye Review Sectoral Dialogue Partnership\n• Source: https://asean.org/wp-content/uploads/2024/12/Overview-ASEAN-Turkiye-Sectoral-Dialogue-Partnership-as-of-Dec-2024.pdf\n• Date: December 15, 2024\n• Summary: ASEAN and Türkiye conducted a comprehensive review of their Sectoral Dialogue Partnership, discussing progress in various cooperation areas and exploring new opportunities to enhance collaboration in trade, culture, and technology.\n\nASEAN and Australia Celebrate 50 Years of Dialogue Partnership\n• Source: https://aseanaustralia.pmc.gov.au/50th-anniversary/\n• Date: December 20, 2024\n• Summary: Marking the 50th anniversary of their dialogue partnership, ASEAN and Australia celebrated decades of cooperation contributing to regional security and prosperity. The partnership has evolved to address complex challenges, reinforcing a commitment to a peaceful and stable region.\n\nASEAN and Republic of Korea Strengthen Ties\n• Source: https://www.mfaic.gov.kh/Posts/2024-12-27-Embassy-News-The-Royal-Embassy-of-Cambodia-to-the-Federal-Republic-of-Germany-hosted-ASEAN-Republic-of-Korea-Work-15-12-59\n• Date: December 19, 2024\n• Summary: The Royal Embassy of Cambodia in Germany hosted an ASEAN-Republic of Korea Working Lunch, bringing together ambassadors and officials to discuss enhancing cooperation in various sectors, including trade, education, and cultural exchange.\n\nASEAN Participates in International Conference on Research Infrastructure\n• Source: https://www.eeas.europa.eu/delegations/association-southeast-asian-nations-asean/asean-icri-2024-exploring-new-opportunities-research-infrastructure-collaboration_en\n• Date: December 6, 2024\n• Summary: The ASEAN Regional Research Infrastructure Task Force made its debut at the International Conference on Research Infrastructure in Brisbane, Australia. This participation underscores ASEAN’s commitment to advancing research collaboration and innovation with global partners.\nLabour Migration\n\nUN Network on Migration Launches Thailand Migration Report 2024\n• Source: https://thailand.un.org/en/285916-united-nations-network-migration-launches-thailand-migration-report-2024\n• Date: December 13, 2024\n• Summary: The United Nations Network on Migration in Thailand released the Thailand Migration Report 2024, providing a comprehensive analysis of migration trends, policies, and the experiences of migrants in Thailand. The report highlights key challenges and opportunities for sustainable development.\n\nILO Highlights Role of Care Work in ASEAN Labour Migration\n• Source: https://www.ilo.org/publications/care-work-and-labour-migration-asean\n• Date: December 5, 2024\n• Summary: The International Labour Organization published a paper discussing how care needs can be met through labour migration in ASEAN. It reviews tools and challenges in facilitating labour mobility and recommends measures to protect and promote the rights of migrant care workers.\n\nUN Women Calls for Proposals to Support Women Migrant Workers\n• Source: https://asiapacific.unwomen.org/en/programme-implementation/2024/11/unw-ap-tha-cfp-2024-001-ensuring-decent-work-and-reducing-vulnerabilities-for-women-and-children-in-the-context-of-labour-migration-in-southeast-asia\n• Date: December 24, 2024\n• Summary: As part of the PROTECT project, UN Women announced a call for proposals to support activities ensuring decent work and reducing vulnerabilities for women and children in the context of labour migration in Southeast Asia. The initiative aims to enhance protections and coordinated services for migrant women.\n\nEvaluation of TRIANGLE in ASEAN Program Shows Positive Outcomes\n• Source: https://www.dfat.gov.au/publications/publications/tripartite-action-enhance-contribution-labour-migration-growth-and-development-triangle-asean-program-final-independent-evaluation-2024\n• Date: December 18, 2024\n• Summary: An independent evaluation of the TRIANGLE in ASEAN program found significant achievements in strengthening migration governance and empowering migrant workers. The program’s strong partnerships and trust-building efforts have been key drivers of its success.\n\nMalaysia and Bangladesh Discuss Labour Migration Issues\n• Source: [https://www.reuters.com/world/asia-pacific/malaysia-pm-visit-bangladesh-focus-labour-\n\nEconomic and Political Affairs\n\nMalaysia PM Appoints Thai Heavyweight Thaksin as Adviser on ASEAN\n• Source: https://www.reuters.com/world/asia-pacific/malaysia-pm-appoints-thai-heavyweight-thaksin-his-adviser-asean-2024-12-16/\n• Date: December 16, 2024\n• Summary: Malaysian Prime Minister Anwar Ibrahim appointed former Thai Prime Minister Thaksin Shinawatra as his personal adviser for Malaysia’s upcoming chairmanship of ASEAN in 2025. Thaksin’s role will be informal, leveraging his extensive experience to support ASEAN initiatives.\n\nThailand Hosts Regional Talks to Address Myanmar’s Civil War\n• Source: https://apnews.com/article/8b05c4d22e649f88aeb1449bcf052710\n• Date: December 19, 2024\n• Summary: Thailand convened regional discussions in Bangkok to seek solutions to Myanmar’s ongoing civil conflict, which began after the military coup in February 2021. The talks included Myanmar and neighboring countries such as Laos, China, India, Bangladesh, and Thailand, aiming to foster dialogue and peace in the region.\n\nASEAN Economic Integration Brief Highlights Regional Synergy and Services Facilitation\n• Source: https://asean.org/asean-economic-integration-brief-highlights-regional-synergy-and-services-facilitation/\n• Date: December 16, 2024\n• Summary: The 16th issue of the ASEAN Economic Integration Brief (AEIB) was released, focusing on regional synergy and services facilitation. The publication underscores ASEAN’s efforts in enhancing economic integration and cooperation among member states.\n\nASEAN Aims to Conclude Digital Economy Pact Negotiations in 2025\n• Source: https://www.iseas.edu.sg/library/blog/daily-news-alerts/241220/\n• Date: December 20, 2024\n• Summary: ASEAN announced its goal to finalize negotiations for a digital economy pact by 2025. This initiative seeks to strengthen digital integration and cooperation among member countries, enhancing the region’s competitiveness in the global digital landscape.\n\nStartup ASEAN Platform Launched to Strengthen Regional Ecosystem\n• Source: https://www.facebook.com/aseansecretariat/posts/in-december-2024-startup-asean-a-new-platform-was-introduced-aimed-at-strengthen/995688729253061/\n• Date: December 2024\n• Summary: In December 2024, “Startup ASEAN,” a new platform aimed at strengthening the startup ecosystem across Southeast Asia, was introduced. The initiative seeks to foster innovation, collaboration, and growth among startups within the ASEAN region.\n\nLeave No One Behind (LNOB) Initiatives\n\nASEAN Enhances Connectivity and Resilience in 2024\n• Source: https://asean.org/wp-content/uploads/2024/12/ASEAN-AR-2024_e-pub_web.pdf\n• Date: December 2024\n• Summary: ASEAN implemented initiatives to enhance the safety of local communities in Cambodia, Lao PDR, and Thailand through landmine clearance and other resilience-building efforts. These actions align with the LNOB principle by addressing the needs of vulnerable populations and promoting inclusive development.\n\nASEAN Strengthens Cooperation Against Trafficking in Persons\n• Source: https://www.unodc.org/roseap/en/2024/12/asean-trafficking-in-persons/story.html\n• Date: December 11, 2024\n• Summary: The ASEAN Senior Officials Meeting on Transnational Crime (SOMTC), supported by the Australian Government-funded ASEAN-ACT and UNODC, convened in Bangkok to enhance regional collaboration against human trafficking. The meeting coincided with the launch of the 2024 UNODC Trafficking in Persons Report, underscoring ASEAN’s commitment to combating this issue and ensuring no one is left behind.\n\nASEAN Key Figures 2024 Report Highlights Regional Progress\n• Source: https://www.aseanstats.org/wp-content/uploads/2024/12/AKF2024.v1.pdf\n• Date: December 2024\n• Summary: The “ASEAN Key Figures 2024” report provides a snapshot of key statistical indicators reflecting the region’s dynamic transformation and progress. The publication highlights ASEAN’s efforts in various sectors, contributing to inclusive development and aligning with the LNOB agenda.\n\n\n\n\n",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://docgen.solutionesia.com/text-to-doc",
+              "protocol": "https",
+              "host": [
+                "docgen",
+                "solutionesia",
+                "com"
+              ],
+              "path": [
+                "text-to-doc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "http://localhost:8085/download/generated_document.docx",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/download/generated_document.docx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "download",
+                "generated_document.docx"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "https://docgen.solutionesia.com",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"json_data\": {\n    \"document\": {\n      \"month\": \"October 2024\",\n      \"sections\": [\n        {\n          \"title\": \"asean_statements_and_communiques\",\n          \"bullets\": [\n            {\n              \"text\": \"Chairman's Statement of the 44th and 45th ASEAN Summits\",\n              \"link\": \"https://asean.org/chairmans-statement-of-the-44th-and-45th-asean-summits/\",\n              \"date\": \"October 13, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"ASEAN Leaders' Declaration on the ASEAN Outlook on the Indo-Pacific for the Future-Ready ASEAN and ASEAN-Centred Regional Architecture\",\n              \"link\": \"https://asean.org/asean-leaders-declaration-on-the-asean-outlook-on-the-indo-pacific-for-the-future-ready-asean-and-asean-centred-regional-architecture/\",\n              \"date\": \"October 9, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"Joint Media Statement of the 11th Meeting of the ASEAN Ministers Responsible for Culture and Arts (AMCA)\",\n              \"link\": \"https://asean.org/joint-media-statement-the-11th-meeting-of-the-asean-ministers-responsible-for-culture-and-arts-amca/\",\n              \"date\": \"October 25, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"Joint Communiqué of the Twenty-Eighth ASEAN Labour Ministers Meeting (28th ALMM)\",\n              \"link\": \"https://asean.org/joint-communique-of-the-twenty-eight-asean-labour-ministers-meeting-28th-almm/\",\n              \"date\": \"October 30, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"ASEAN Joint Statement on Climate Change to the 29th Session of the Conference of the Parties to the United Nations Framework Convention on Climate Change (UNFCCC COP 29)\",\n              \"link\": \"https://asean.org/asean-joint-statement-on-climate-change-to-the-29th-session-of-the-conference-of-the-parties-to-the-united-nations-framework-convention-on-climate-change-unfccc-cop-29/\",\n              \"date\": \"October 12, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            }\n          ]\n        },\n        {\n          \"title\": \"indonesia_and_asean_secretariat_news\",\n          \"bullets\": [\n            {\n              \"text\": \"Secretary-General of ASEAN Participates in the 44th and 45th ASEAN Summits and Related Summits Hosted by Lao PDR\",\n              \"link\": \"https://asean.org/secretary-general-of-asean-to-participate-in-the-44th-and-45th-asean-summits-and-related-summits-hosted-by-lao-pdr/\",\n              \"date\": \"October 10, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Dr. Kao Kim Hourn, Secretary-General of ASEAN, led the ASEAN Secretariat's delegation at the summits in Vientiane, Lao PDR. His participation underscores the Secretariat's role in facilitating regional cooperation and implementing ASEAN initiatives.\"\n            },\n            {\n              \"text\": \"Secretary-General of ASEAN Meets with the U.S. Ambassador to the United Nations\",\n              \"link\": \"https://asean.org/secretary-general-of-asean-meets-with-the-u-s-ambassador-to-the-united-nations/\",\n              \"date\": \"October 11, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Dr. Kao Kim Hourn engaged in discussions with the U.S. delegation led by Ambassador Linda Thomas-Greenfield. The meeting focused on strengthening ASEAN-U.S. relations and exploring collaborative efforts in addressing regional and global challenges.\"\n            },\n            {\n              \"text\": \"ASEAN Leaders' Review and Decision on the Implementation of the Five-Point Consensus\",\n              \"link\": \"https://asean.org/asean-leaders-review-and-decision-on-the-implementation-of-the-five-point-consensus-3/\",\n              \"date\": \"October 8, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"ASEAN leaders assessed the progress of the Five-Point Consensus aimed at resolving the situation in Myanmar. The review emphasized the need for continued dialogue, humanitarian assistance, and efforts to promote peace and stability in the region.\"\n            },\n            {\n              \"text\": \"New Release: The ASEAN Magazine's Special Edition, '20 Years Since the Indian Ocean Tsunami: Lessons and Resilience'\",\n              \"link\": \"https://asean.org/new-release-the-asean-magazines-special-edition-20-years-since-the-indian-ocean-tsunami-lessons-and-resilience/\",\n              \"date\": \"October 8, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"The special edition of The ASEAN Magazine reflects on the lessons and resilience developed over 20 years since the devastating Indian Ocean Tsunami.\"\n            }\n          ]\n        },\n        {\n          \"title\": \"climate_change\",\n          \"bullets\": [\n            {\n              \"text\": \"Southeast Asia Needs to Boost Investments Five-Fold by 2035 to Meet Climate Goals, IEA Says\",\n              \"link\": \"https://www.reuters.com/sustainability/southeast-asia-needs-boost-investments-five-fold-by-2035-meet-climate-goals-iea-2024-10-21/\",\n              \"date\": \"October 21, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"The International Energy Agency (IEA) reported that Southeast Asia must increase clean energy investments to $190 billion annually by 2035—approximately five times the current level—to achieve its climate objectives. The report emphasizes the need for strategies to reduce emissions from the region's young fleet of coal-fired power plants and highlights the challenges posed by rapid economic expansion on energy security and climate goals.\"\n            },\n            {\n              \"text\": \"Cambodia to Boost Power Import Capacity by Over 50% in Next Two Years\",\n              \"link\": \"https://www.reuters.com/business/energy/cambodia-boost-power-import-capacity-by-over-50-next-two-years-2024-10-21/\",\n              \"date\": \"October 21, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Cambodia plans to increase its power import capacity by over 600 megawatts (MW) from neighboring countries Laos, Vietnam, and Thailand within the next two years. This move aims to enhance the nation's access to clean energy sources, including solar and hydro power, and underscores the potential for greater interconnection in Southeast Asia's energy sector.\"\n            },\n            {\n              \"text\": \"Singapore to Co-Fund Carbon Capture and Storage Studies at Power Plants to Aid Net-Zero Emissions Target\",\n              \"link\": \"https://www.reuters.com/business/energy/singapore-co-fund-ccs-studies-some-power-plants-aid-net-zero-emissions-target-2024-10-21/\",\n              \"date\": \"October 21, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Singapore's Energy Market Authority announced plans to co-fund feasibility studies on carbon capture and storage (CCS) technologies for selected power plants. The initiative focuses on both post-combustion carbon capture for combined-cycle gas turbines and pre-combustion carbon capture to produce hydrogen, aligning with Singapore's goal to achieve net-zero emissions by 2050.\"\n            },\n            {\n              \"text\": \"Germany's PNE Seeks Vietnam Approval for $4.6 Billion Offshore Wind Project\",\n              \"link\": \"https://www.reuters.com/business/energy/germanys-pne-seeks-vietnam-approval-46-bln-offshore-wind-project-2024-10-23/\",\n              \"date\": \"October 23, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"German company PNE AG is seeking approval from the Vietnamese government to develop a $4.6 billion offshore wind farm in Binh Dinh province. The proposed project aims to contribute 2,000 megawatts of renewable energy, supporting Vietnam's target of achieving 6 gigawatts of offshore wind capacity by 2030.\"\n            },\n            {\n              \"text\": \"Inaction on Emissions Could Cut Developing Asia's GDP by 17% by 2070, ADB Says\",\n              \"link\": \"https://www.reuters.com/world/asia-pacific/inaction-emissions-could-cut-developing-asias-gdp-by-17-by-2070-adb-says-2024-10-31/\",\n              \"date\": \"October 31, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"The Asian Development Bank warns that without significant emission reduction efforts, developing Asia could face a 17% decrease in gross domestic product by 2070. The report highlights the urgency for more ambitious climate actions to mitigate the severe economic and environmental impacts of climate change in the region.\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://docgen.solutionesia.com/generate-doc",
+              "protocol": "https",
+              "host": [
+                "docgen",
+                "solutionesia",
+                "com"
+              ],
+              "path": [
+                "generate-doc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Analyze API",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"url\": \"https://ai-doc-gen.onrender.com/generate-doc\",\n    \"method\": \"POST\",\n    \"headers\": {\n        \"Content-Type\": \"application/json\",\n        \"Authorization\": \"Bearer your_access_token_here\",\n        \"Accept\": \"application/json\"\n    },\n    \"params\": {\n        \"page\": 1,\n        \"limit\": 10,\n        \"filter\": \"active\"\n    },\n    \"body\": {\n        \"json_data\": {\n            \"document\": {\n            \"month\": \"October 2024\",\n            \"sections\": [\n                {\n                \"title\": \"asean_statements_and_communiques\",\n                \"bullets\": [\n                    {\n                    \"text\": \"Chairman's Statement of the 44th and 45th ASEAN Summits\",\n                    \"link\": \"https://asean.org/chairmans-statement-of-the-44th-and-45th-asean-summits/\",\n                    \"date\": \"October 13, 2024\",\n                    \"styles\": [\"bold\", \"underline\"]\n                    },\n                    {\n                    \"text\": \"ASEAN Leaders' Declaration on the ASEAN Outlook on the Indo-Pacific for the Future-Ready ASEAN and ASEAN-Centred Regional Architecture\",\n                    \"link\": \"https://asean.org/asean-leaders-declaration-on-the-asean-outlook-on-the-indo-pacific-for-the-future-ready-asean-and-asean-centred-regional-architecture/\",\n                    \"date\": \"October 9, 2024\",\n                    \"styles\": [\"bold\", \"underline\"]\n                    },\n                    {\n                    \"text\": \"Joint Media Statement of the 11th Meeting of the ASEAN Ministers Responsible for Culture and Arts (AMCA)\",\n                    \"link\": \"https://asean.org/joint-media-statement-the-11th-meeting-of-the-asean-ministers-responsible-for-culture-and-arts-amca/\",\n                    \"date\": \"October 25, 2024\",\n                    \"styles\": [\"bold\", \"underline\"]\n                    },\n                    {\n                    \"text\": \"Joint Communiqué of the Twenty-Eighth ASEAN Labour Ministers Meeting (28th ALMM)\",\n                    \"link\": \"https://asean.org/joint-communique-of-the-twenty-eight-asean-labour-ministers-meeting-28th-almm/\",\n                    \"date\": \"October 30, 2024\",\n                    \"styles\": [\"bold\", \"underline\"]\n                    },\n                    {\n                    \"text\": \"ASEAN Joint Statement on Climate Change to the 29th Session of the Conference of the Parties to the United Nations Framework Convention on Climate Change (UNFCCC COP 29)\",\n                    \"link\": \"https://asean.org/asean-joint-statement-on-climate-change-to-the-29th-session-of-the-conference-of-the-parties-to-the-united-nations-framework-convention-on-climate-change-unfccc-cop-29/\",\n                    \"date\": \"October 12, 2024\",\n                    \"styles\": [\"bold\", \"underline\"]\n                    }\n                ]\n                },\n                {\n                \"title\": \"indonesia_and_asean_secretariat_news\",\n                \"bullets\": [\n                    {\n                    \"text\": \"Secretary-General of ASEAN Participates in the 44th and 45th ASEAN Summits and Related Summits Hosted by Lao PDR\",\n                    \"link\": \"https://asean.org/secretary-general-of-asean-to-participate-in-the-44th-and-45th-asean-summits-and-related-summits-hosted-by-lao-pdr/\",\n                    \"date\": \"October 10, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"Dr. Kao Kim Hourn, Secretary-General of ASEAN, led the ASEAN Secretariat's delegation at the summits in Vientiane, Lao PDR. His participation underscores the Secretariat's role in facilitating regional cooperation and implementing ASEAN initiatives.\"\n                    },\n                    {\n                    \"text\": \"Secretary-General of ASEAN Meets with the U.S. Ambassador to the United Nations\",\n                    \"link\": \"https://asean.org/secretary-general-of-asean-meets-with-the-u-s-ambassador-to-the-united-nations/\",\n                    \"date\": \"October 11, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"Dr. Kao Kim Hourn engaged in discussions with the U.S. delegation led by Ambassador Linda Thomas-Greenfield. The meeting focused on strengthening ASEAN-U.S. relations and exploring collaborative efforts in addressing regional and global challenges.\"\n                    },\n                    {\n                    \"text\": \"ASEAN Leaders' Review and Decision on the Implementation of the Five-Point Consensus\",\n                    \"link\": \"https://asean.org/asean-leaders-review-and-decision-on-the-implementation-of-the-five-point-consensus-3/\",\n                    \"date\": \"October 8, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"ASEAN leaders assessed the progress of the Five-Point Consensus aimed at resolving the situation in Myanmar. The review emphasized the need for continued dialogue, humanitarian assistance, and efforts to promote peace and stability in the region.\"\n                    },\n                    {\n                    \"text\": \"New Release: The ASEAN Magazine's Special Edition, '20 Years Since the Indian Ocean Tsunami: Lessons and Resilience'\",\n                    \"link\": \"https://asean.org/new-release-the-asean-magazines-special-edition-20-years-since-the-indian-ocean-tsunami-lessons-and-resilience/\",\n                    \"date\": \"October 8, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"The special edition of The ASEAN Magazine reflects on the lessons and resilience developed over 20 years since the devastating Indian Ocean Tsunami.\"\n                    }\n                ]\n                },\n                {\n                \"title\": \"climate_change\",\n                \"bullets\": [\n                    {\n                    \"text\": \"Southeast Asia Needs to Boost Investments Five-Fold by 2035 to Meet Climate Goals, IEA Says\",\n                    \"link\": \"https://www.reuters.com/sustainability/southeast-asia-needs-boost-investments-five-fold-by-2035-meet-climate-goals-iea-2024-10-21/\",\n                    \"date\": \"October 21, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"The International Energy Agency (IEA) reported that Southeast Asia must increase clean energy investments to $190 billion annually by 2035—approximately five times the current level—to achieve its climate objectives. The report emphasizes the need for strategies to reduce emissions from the region's young fleet of coal-fired power plants and highlights the challenges posed by rapid economic expansion on energy security and climate goals.\"\n                    },\n                    {\n                    \"text\": \"Cambodia to Boost Power Import Capacity by Over 50% in Next Two Years\",\n                    \"link\": \"https://www.reuters.com/business/energy/cambodia-boost-power-import-capacity-by-over-50-next-two-years-2024-10-21/\",\n                    \"date\": \"October 21, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"Cambodia plans to increase its power import capacity by over 600 megawatts (MW) from neighboring countries Laos, Vietnam, and Thailand within the next two years. This move aims to enhance the nation's access to clean energy sources, including solar and hydro power, and underscores the potential for greater interconnection in Southeast Asia's energy sector.\"\n                    },\n                    {\n                    \"text\": \"Singapore to Co-Fund Carbon Capture and Storage Studies at Power Plants to Aid Net-Zero Emissions Target\",\n                    \"link\": \"https://www.reuters.com/business/energy/singapore-co-fund-ccs-studies-some-power-plants-aid-net-zero-emissions-target-2024-10-21/\",\n                    \"date\": \"October 21, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"Singapore's Energy Market Authority announced plans to co-fund feasibility studies on carbon capture and storage (CCS) technologies for selected power plants. The initiative focuses on both post-combustion carbon capture for combined-cycle gas turbines and pre-combustion carbon capture to produce hydrogen, aligning with Singapore's goal to achieve net-zero emissions by 2050.\"\n                    },\n                    {\n                    \"text\": \"Germany's PNE Seeks Vietnam Approval for $4.6 Billion Offshore Wind Project\",\n                    \"link\": \"https://www.reuters.com/business/energy/germanys-pne-seeks-vietnam-approval-46-bln-offshore-wind-project-2024-10-23/\",\n                    \"date\": \"October 23, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"German company PNE AG is seeking approval from the Vietnamese government to develop a $4.6 billion offshore wind farm in Binh Dinh province. The proposed project aims to contribute 2,000 megawatts of renewable energy, supporting Vietnam's target of achieving 6 gigawatts of offshore wind capacity by 2030.\"\n                    },\n                    {\n                    \"text\": \"Inaction on Emissions Could Cut Developing Asia's GDP by 17% by 2070, ADB Says\",\n                    \"link\": \"https://www.reuters.com/world/asia-pacific/inaction-emissions-could-cut-developing-asias-gdp-by-17-by-2070-adb-says-2024-10-31/\",\n                    \"date\": \"October 31, 2024\",\n                    \"styles\": [\"bold\", \"underline\"],\n                    \"content\": \"The Asian Development Bank warns that without significant emission reduction efforts, developing Asia could face a 17% decrease in gross domestic product by 2070. The report highlights the urgency for more ambitious climate actions to mitigate the severe economic and environmental impacts of climate change in the region.\"\n                    }\n                ]\n                }\n            ]\n            }\n        }\n    },\n    \"timeout\": 60\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/analyze-api",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "analyze-api"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "https://docgen.solutionesia.com/download/generated_document.docx",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://docgen.solutionesia.com/download/generated_document.docx",
+              "protocol": "https",
+              "host": [
+                "docgen",
+                "solutionesia",
+                "com"
+              ],
+              "path": [
+                "download",
+                "generated_document.docx"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "http://localhost:8085/generate-doc",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"json_data\": {\n    \"document\": {\n      \"month\": \"October 2024\",\n      \"sections\": [\n        {\n          \"title\": \"asean_statements_and_communiques\",\n          \"bullets\": [\n            {\n              \"text\": \"Chairman's Statement of the 44th and 45th ASEAN Summits\",\n              \"link\": \"https://asean.org/chairmans-statement-of-the-44th-and-45th-asean-summits/\",\n              \"date\": \"October 13, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"ASEAN Leaders' Declaration on the ASEAN Outlook on the Indo-Pacific for the Future-Ready ASEAN and ASEAN-Centred Regional Architecture\",\n              \"link\": \"https://asean.org/asean-leaders-declaration-on-the-asean-outlook-on-the-indo-pacific-for-the-future-ready-asean-and-asean-centred-regional-architecture/\",\n              \"date\": \"October 9, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"Joint Media Statement of the 11th Meeting of the ASEAN Ministers Responsible for Culture and Arts (AMCA)\",\n              \"link\": \"https://asean.org/joint-media-statement-the-11th-meeting-of-the-asean-ministers-responsible-for-culture-and-arts-amca/\",\n              \"date\": \"October 25, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"Joint Communiqué of the Twenty-Eighth ASEAN Labour Ministers Meeting (28th ALMM)\",\n              \"link\": \"https://asean.org/joint-communique-of-the-twenty-eight-asean-labour-ministers-meeting-28th-almm/\",\n              \"date\": \"October 30, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            },\n            {\n              \"text\": \"ASEAN Joint Statement on Climate Change to the 29th Session of the Conference of the Parties to the United Nations Framework Convention on Climate Change (UNFCCC COP 29)\",\n              \"link\": \"https://asean.org/asean-joint-statement-on-climate-change-to-the-29th-session-of-the-conference-of-the-parties-to-the-united-nations-framework-convention-on-climate-change-unfccc-cop-29/\",\n              \"date\": \"October 12, 2024\",\n              \"styles\": [\"bold\", \"underline\"]\n            }\n          ]\n        },\n        {\n          \"title\": \"indonesia_and_asean_secretariat_news\",\n          \"bullets\": [\n            {\n              \"text\": \"Secretary-General of ASEAN Participates in the 44th and 45th ASEAN Summits and Related Summits Hosted by Lao PDR\",\n              \"link\": \"https://asean.org/secretary-general-of-asean-to-participate-in-the-44th-and-45th-asean-summits-and-related-summits-hosted-by-lao-pdr/\",\n              \"date\": \"October 10, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Dr. Kao Kim Hourn, Secretary-General of ASEAN, led the ASEAN Secretariat's delegation at the summits in Vientiane, Lao PDR. His participation underscores the Secretariat's role in facilitating regional cooperation and implementing ASEAN initiatives.\"\n            },\n            {\n              \"text\": \"Secretary-General of ASEAN Meets with the U.S. Ambassador to the United Nations\",\n              \"link\": \"https://asean.org/secretary-general-of-asean-meets-with-the-u-s-ambassador-to-the-united-nations/\",\n              \"date\": \"October 11, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Dr. Kao Kim Hourn engaged in discussions with the U.S. delegation led by Ambassador Linda Thomas-Greenfield. The meeting focused on strengthening ASEAN-U.S. relations and exploring collaborative efforts in addressing regional and global challenges.\"\n            },\n            {\n              \"text\": \"ASEAN Leaders' Review and Decision on the Implementation of the Five-Point Consensus\",\n              \"link\": \"https://asean.org/asean-leaders-review-and-decision-on-the-implementation-of-the-five-point-consensus-3/\",\n              \"date\": \"October 8, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"ASEAN leaders assessed the progress of the Five-Point Consensus aimed at resolving the situation in Myanmar. The review emphasized the need for continued dialogue, humanitarian assistance, and efforts to promote peace and stability in the region.\"\n            },\n            {\n              \"text\": \"New Release: The ASEAN Magazine's Special Edition, '20 Years Since the Indian Ocean Tsunami: Lessons and Resilience'\",\n              \"link\": \"https://asean.org/new-release-the-asean-magazines-special-edition-20-years-since-the-indian-ocean-tsunami-lessons-and-resilience/\",\n              \"date\": \"October 8, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"The special edition of The ASEAN Magazine reflects on the lessons and resilience developed over 20 years since the devastating Indian Ocean Tsunami.\"\n            }\n          ]\n        },\n        {\n          \"title\": \"climate_change\",\n          \"bullets\": [\n            {\n              \"text\": \"Southeast Asia Needs to Boost Investments Five-Fold by 2035 to Meet Climate Goals, IEA Says\",\n              \"link\": \"https://www.reuters.com/sustainability/southeast-asia-needs-boost-investments-five-fold-by-2035-meet-climate-goals-iea-2024-10-21/\",\n              \"date\": \"October 21, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"The International Energy Agency (IEA) reported that Southeast Asia must increase clean energy investments to $190 billion annually by 2035—approximately five times the current level—to achieve its climate objectives. The report emphasizes the need for strategies to reduce emissions from the region's young fleet of coal-fired power plants and highlights the challenges posed by rapid economic expansion on energy security and climate goals.\"\n            },\n            {\n              \"text\": \"Cambodia to Boost Power Import Capacity by Over 50% in Next Two Years\",\n              \"link\": \"https://www.reuters.com/business/energy/cambodia-boost-power-import-capacity-by-over-50-next-two-years-2024-10-21/\",\n              \"date\": \"October 21, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Cambodia plans to increase its power import capacity by over 600 megawatts (MW) from neighboring countries Laos, Vietnam, and Thailand within the next two years. This move aims to enhance the nation's access to clean energy sources, including solar and hydro power, and underscores the potential for greater interconnection in Southeast Asia's energy sector.\"\n            },\n            {\n              \"text\": \"Singapore to Co-Fund Carbon Capture and Storage Studies at Power Plants to Aid Net-Zero Emissions Target\",\n              \"link\": \"https://www.reuters.com/business/energy/singapore-co-fund-ccs-studies-some-power-plants-aid-net-zero-emissions-target-2024-10-21/\",\n              \"date\": \"October 21, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"Singapore's Energy Market Authority announced plans to co-fund feasibility studies on carbon capture and storage (CCS) technologies for selected power plants. The initiative focuses on both post-combustion carbon capture for combined-cycle gas turbines and pre-combustion carbon capture to produce hydrogen, aligning with Singapore's goal to achieve net-zero emissions by 2050.\"\n            },\n            {\n              \"text\": \"Germany's PNE Seeks Vietnam Approval for $4.6 Billion Offshore Wind Project\",\n              \"link\": \"https://www.reuters.com/business/energy/germanys-pne-seeks-vietnam-approval-46-bln-offshore-wind-project-2024-10-23/\",\n              \"date\": \"October 23, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"German company PNE AG is seeking approval from the Vietnamese government to develop a $4.6 billion offshore wind farm in Binh Dinh province. The proposed project aims to contribute 2,000 megawatts of renewable energy, supporting Vietnam's target of achieving 6 gigawatts of offshore wind capacity by 2030.\"\n            },\n            {\n              \"text\": \"Inaction on Emissions Could Cut Developing Asia's GDP by 17% by 2070, ADB Says\",\n              \"link\": \"https://www.reuters.com/world/asia-pacific/inaction-emissions-could-cut-developing-asias-gdp-by-17-by-2070-adb-says-2024-10-31/\",\n              \"date\": \"October 31, 2024\",\n              \"styles\": [\"bold\", \"underline\"],\n              \"content\": \"The Asian Development Bank warns that without significant emission reduction efforts, developing Asia could face a 17% decrease in gross domestic product by 2070. The report highlights the urgency for more ambitious climate actions to mitigate the severe economic and environmental impacts of climate change in the region.\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/generate-doc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "generate-doc"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Whatsapp Chat",
+      "item": [
+        {
+          "name": "Create Message",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"Apa bakmi paling enak di sini?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/assistant/message/thread_x8J9rRoL2j9f82d6wHor72Pk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "assistant",
+                "message",
+                "thread_x8J9rRoL2j9f82d6wHor72Pk"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Thread",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/assistant/thread",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "assistant",
+                "thread"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Run Message",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/assistant/run/asst_TZYUDO5mdGLjUeAnCaOQcrLj/thread_x8J9rRoL2j9f82d6wHor72Pk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "assistant",
+                "run",
+                "asst_TZYUDO5mdGLjUeAnCaOQcrLj",
+                "thread_x8J9rRoL2j9f82d6wHor72Pk"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get message",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/assistant/messages/thread_x8J9rRoL2j9f82d6wHor72Pk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "assistant",
+                "messages",
+                "thread_x8J9rRoL2j9f82d6wHor72Pk"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"assistant_id\": \"asst_TZYUDO5mdGLjUeAnCaOQcrLj\",\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"jual bakmi apa aja sih?\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://docgen.solutionesia.com/assistant/chat",
+              "protocol": "https",
+              "host": [
+                "docgen",
+                "solutionesia",
+                "com"
+              ],
+              "path": [
+                "assistant",
+                "chat"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat Local",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"assistant_id\": \"asst_TZYUDO5mdGLjUeAnCaOQcrLj\",\n    \"thread_id\": \"thread_x8J9rRoL2j9f82d6wHor72Pk\",\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"Buka jam berapa dah?\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/assistant/chat",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "assistant",
+                "chat"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat Manychat",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"assistant_id\": \"asst_TZYUDO5mdGLjUeAnCaOQcrLj\",\n    \"thread_id\": \"thread_x8J9rRoL2j9f82d6wHor72Pk\",\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"Buka jam berapa dah?\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/assistant/chat",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "assistant",
+                "chat"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Action",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"get_menu\",\n    \"description\": \"Get the restaurant menu items by category\",\n    \"parameters\": [\n        {\n            \"name\": \"category\",\n            \"type\": \"string\",\n            \"description\": \"Menu category (appetizers, main, desserts, or all)\",\n            \"required\": false,\n            \"enum\": [\"all\", \"appetizers\", \"main\", \"desserts\"]\n        }\n    ],\n    \"function_path\": \"app.functions.menu_functions.get_menu\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/assistant/actions/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "assistant",
+                "actions",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat Whatsapp Image",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"object\": \"whatsapp_business_account\",\n    \"entry\": [\n        {\n            \"id\": \"529942286877576\",\n            \"changes\": [\n                {\n                    \"value\": {\n                        \"messaging_product\": \"whatsapp\",\n                        \"metadata\": {\n                            \"display_phone_number\": \"15551873800\",\n                            \"phone_number_id\": \"571461226049613\"\n                        },\n                        \"contacts\": [\n                            {\n                                \"profile\": {\n                                    \"name\": \"Kent\"\n                                },\n                                \"wa_id\": \"6281288477837\"\n                            }\n                        ],\n                        \"messages\": [\n                            {\n                                \"from\": \"6281288477837\",\n                                \"id\": \"wamid.HBgNNjI4MTI4ODQ3NzgzNxUCABIYFDNBRjQ5QkE4QzdEQTU3MjU3NjA4AA==\",\n                                \"timestamp\": \"1740625438\",\n                                \"type\": \"image\",\n                                \"image\": {\n                                    \"mime_type\": \"image\\/jpeg\",\n                                    \"sha256\": \"ER0VFCqTeAO3BW7O0GTBTqVjojdTZj7u0Nt8ul604XU=\",\n                                    \"id\": \"953675820167045\"\n                                }\n                            }\n                        ]\n                    },\n                    \"field\": \"messages\"\n                }\n            ]\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/whatsapp/webhook",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "whatsapp",
+                "webhook"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat Whatsapp",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"object\": \"whatsapp_business_account\",\n    \"entry\": [\n        {\n            \"id\": \"529942286877576\",\n            \"changes\": [\n                {\n                    \"value\": {\n                        \"messaging_product\": \"whatsapp\",\n                        \"metadata\": {\n                            \"display_phone_number\": \"15551873800\",\n                            \"phone_number_id\": \"949675011562911\"\n                        },\n                        \"contacts\": [\n                            {\n                                \"profile\": {\n                                    \"name\": \"Kent\"\n                                },\n                                \"wa_id\": \"6281288477837\"\n                            }\n                        ],\n                        \"messages\": [\n                            {\n                                \"from\": \"6281288477837\",\n                                \"id\": \"wamid.test1234567897\",  // ← Change this to a unique value\n                                \"timestamp\": \"1768658472\",\n                                \"type\": \"text\",\n                                \"text\": {\n                                    \"body\": \"jual apa sih\"\n                                }\n                            }\n                        ]\n                    },\n                    \"field\": \"messages\"\n                }\n            ]\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/whatsapp/webhook",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "whatsapp",
+                "webhook"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Whatsapp Contact",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"object\": \"whatsapp_business_account\",\n    \"entry\": [\n        {\n            \"id\": \"529942286877576\",\n            \"changes\": [\n                {\n                    \"value\": {\n                        \"messaging_product\": \"whatsapp\",\n                        \"metadata\": {\n                            \"display_phone_number\": \"15551873800\",\n                            \"phone_number_id\": \"571461226049613\"\n                        },\n                        \"contacts\": [\n                            {\n                                \"profile\": {\n                                    \"name\": \"Kent\"\n                                },\n                                \"wa_id\": \"6281288477837\"\n                            }\n                        ],\n                        \"messages\": [\n                            {\n                                \"from\": \"6281288477837\",\n                                \"id\": \"wamid.HBgNNjI4MTI4ODQ3NzgzNxUCABIYFDNBRjQ5QkE4QzdEQTU3MjU3NjA4AA==\",\n                                \"timestamp\": \"1740625438\",\n                                \"type\": \"image\",\n                                \"image\": {\n                                    \"mime_type\": \"image\\/jpeg\",\n                                    \"sha256\": \"ER0VFCqTeAO3BW7O0GTBTqVjojdTZj7u0Nt8ul604XU=\",\n                                    \"id\": \"953675820167045\"\n                                }\n                            }\n                        ]\n                    },\n                    \"field\": \"messages\"\n                }\n            ]\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/whatsapp/webhook",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "whatsapp",
+                "webhook"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Graph Test",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Register Phone Number",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"messaging_product\": \"whatsapp\",\n    \"pin\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://graph.facebook.com/v22.0/949675011562911/register",
+              "protocol": "https",
+              "host": [
+                "graph",
+                "facebook",
+                "com"
+              ],
+              "path": [
+                "v22.0",
+                "949675011562911",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
