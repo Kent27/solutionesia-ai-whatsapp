@@ -1,3 +1,7 @@
+from app.services.conversation_service import insert_conversation
+from app.services.conversation_service import get_conversation
+from app.services.conversation_service import insert_message
+from app.services.customer_service import get_customer
 import base64
 import json
 import os
@@ -6,6 +10,7 @@ from PIL import Image  # Change this line
 from io import BytesIO
 from typing import Dict, Any, List, Optional
 import logging
+from .organization_service import OrganizationService
 from ..models.whatsapp_models import WhatsAppWebhookRequest, WhatsAppMessage, WhatsAppContact
 from ..services.openai_service import OpenAIAssistantService
 from ..models.assistant_models import ChatRequest, ChatMessage, ContentItem, ImageFileContent, TextContent
@@ -66,6 +71,7 @@ class WhatsAppService:
         self.access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
         self.base_url = f"https://graph.facebook.com/{self.api_version}"
         self.assistant_service = OpenAIAssistantService()
+        self.organization_service = OrganizationService()
         self.openai_headers = {
             "OpenAI-Beta": "assistants=v2",
             "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
@@ -145,6 +151,7 @@ class WhatsAppService:
             entry = request.entry[0]
             change = entry.changes[0]
             value = change.value
+            phone_id = value.metadata.phone_number_id
 
             # Check if this is a status update and the value is not None
             if hasattr(value, 'statuses') and value.statuses is not None:
@@ -162,6 +169,14 @@ class WhatsAppService:
             # Continue only if it's a message
             if not hasattr(value, 'messages') or not value.messages:
                 return {"status": "success", "message": "No messages to process"}
+            
+            # Check if organization exist
+            organization = await self.organization_service.get_organization_by_phone_id(phone_id)
+            if not organization or organization is None: 
+                return {
+                    "status": "error",
+                    "message": "Organization not found"
+                }
 
             messages = [WhatsAppMessage.model_validate(msg) for msg in value.messages]
             contact = WhatsAppContact.model_validate(value.contacts[0])
@@ -238,122 +253,42 @@ class WhatsAppService:
                     direction="incoming"
                 )
             
-            # Check if customer exists in Google Sheets - MOVED TO BEGINNING
-            customer = await check_customer_exists(messages[0].from_)
+            # Get customer from database
+            organization_id = str(organization['id'])
+            customer = await get_customer(messages[0].from_, contact.profile.name, organization_id)
             
-            # Create customer if they don't exist - MOVED FROM AFTER OPENAI CALL
             if not customer:
-                logger.info(f"Customer Does Not Exist - Creating new customer record for: {contact.profile.name} ({messages[0].from_})")
-                # For new customers, we need to insert the full record with a temporary thread_id
-                # We'll update the thread_id after the OpenAI call
-                customer_data = {
-                    'phone': messages[0].from_,
-                    'name': contact.profile.name,
-                    'thread_id': ''  # Empty thread_id will be updated after OpenAI call
-                }
-                await insert_customer(customer_data)
-                
-                # Fetch the newly created customer record
-                customer = await check_customer_exists(messages[0].from_)
-                if not customer:
-                    log_whatsapp_message(
-                        phone_number=messages[0].from_,
-                        message_type="error",
-                        message_data={"error": f"Failed to create customer record for {messages[0].from_}"},
-                        direction="system"
-                    )
+                 return {"status": "error", "message": "Failed to get or create customer"}
+
+            conversation = await get_conversation(customer.id, organization_id)
+            # TODO: To be migrated into function call
+            # # Check if customer is in "human" mode - if so, skip AI processing
+            # # But don't skip if it's the admin's number
+            # admin_phone = os.getenv('ADMIN_WHATSAPP_NUMBER')
+            # is_admin = admin_phone and messages[0].from_ == admin_phone
             
-            # DUPLICATE FUNCTIONALITY FOR MARIADB CONTACTS TABLE
-            # Check if contact exists in MariaDB contacts table
-            try:
-                from ..services.contact_service import ContactService
-                contact_service = ContactService()
-                
-                # Look for an existing contact with this phone number
-                query = """
-                    SELECT id, name, user_id 
-                    FROM contacts 
-                    WHERE phone_number = %s
-                """
-                pool = await self.db.get_pool()
-                async with pool.acquire() as conn:
-                    async with conn.cursor() as cur:
-                        await cur.execute(query, (messages[0].from_,))
-                        contact_record = await cur.fetchone()
-                
-                if not contact_record:
-                    logger.info(f"Contact Does Not Exist in Database - Creating new contact record for: {contact.profile.name} ({messages[0].from_})")
-                    
-                    # Insert the new WhatsApp contact (user_id is NULL - these are WhatsApp customers, not app users)
-                    insert_query = """
-                        INSERT INTO contacts (name, phone_number, user_id, created_at)
-                        VALUES (%s, %s, NULL, NOW())
-                    """
-                    pool = await self.db.get_pool()
-                    async with pool.acquire() as conn:
-                        async with conn.cursor() as cur:
-                            await cur.execute(insert_query, (
-                                contact.profile.name,
-                                messages[0].from_,
-                            ))
-                    
-                    logger.info(f"Successfully created contact record in database for {messages[0].from_}")
-                else:
-                    logger.debug(f"Contact already exists in database: {contact_record[1]} ({messages[0].from_})")
-                    
-                    # Update the contact name if it's different
-                    if contact_record[1] != contact.profile.name:
-                        update_query = """
-                            UPDATE contacts
-                            SET name = %s, updated_at = NOW()
-                            WHERE id = %s
-                        """
-                        pool = await self.db.get_pool()
-                        async with pool.acquire() as conn:
-                            async with conn.cursor() as cur:
-                                await cur.execute(update_query, (
-                                    contact.profile.name,
-                                    contact_record[0]
-                                ))
-                        logger.info(f"Updated contact name in database for {messages[0].from_}")
-                        
-            except Exception as e:
-                log_whatsapp_message(
-                    phone_number=messages[0].from_,
-                    message_type="error",
-                    message_data={"error": f"Error checking/updating contact in database: {str(e)}"},
-                    direction="system"
-                )
-                # Continue processing even if the database operation fails
-                # This ensures the Google Sheets functionality remains intact
-            
-            # Check if customer is in "Live Chat" mode - if so, skip AI processing
-            # But don't skip if it's the admin's number
-            admin_phone = os.getenv('ADMIN_WHATSAPP_NUMBER')
-            is_admin = admin_phone and messages[0].from_ == admin_phone
-            
-            if customer and customer.get('chat_status') == "Live Chat" and not is_admin:
-                logger.info(f"Customer {messages[0].from_} is in Live Chat mode. Skipping AI processing.")
-                log_whatsapp_message(
-                    phone_number=messages[0].from_,
-                    message_type="system",
-                    message_data={"message": "Live Chat mode active - AI processing skipped"},
-                    direction="system"
-                )
-                return {"status": "success", "message": "Live Chat mode active - AI processing skipped"}
-            elif customer and customer.get('chat_status') == "Live Chat" and is_admin:
-                logger.info(f"Admin {messages[0].from_} is in Live Chat mode but will still get AI responses.")
-                log_whatsapp_message(
-                    phone_number=messages[0].from_,
-                    message_type="system",
-                    message_data={"message": "Admin override - AI processing continues despite Live Chat mode"},
-                    direction="system"
-                )
+            # # Skips AI processing
+            # if customer and conversation.mode == "human" and not is_admin:
+            #     logger.info(f"Customer {messages[0].from_} is in human mode. Skipping AI processing.")
+            #     log_whatsapp_message(
+            #         phone_number=messages[0].from_,
+            #         message_type="system",
+            #         message_data={"message": "human mode active - AI processing skipped"},
+            #         direction="system"
+            #     )
+            #     return {"status": "success", "message": "human mode active - AI processing skipped"}
+            # elif customer and conversation.mode == "human" and is_admin:
+            #     logger.info(f"Admin {messages[0].from_} is in human mode but will still get AI responses.")
+            #     log_whatsapp_message(
+            #         phone_number=messages[0].from_,
+            #         message_type="system",
+            #         message_data={"message": "Admin override - AI processing continues despite human mode"},
+            #         direction="system"
+            #     )
             
             # Process all messages
             content_items: List[Dict] = []
-            thread_id = customer.get('thread_id') if customer else None
-            
+
             # Add customer information as context at the beginning
             customer_context = f"Customer: {contact.profile.name}, Phone: {messages[0].from_}"
             content_items.append({
@@ -420,35 +355,51 @@ class WhatsAppService:
             # Get AI response with all message contents and metadata
             chat_response = await self.assistant_service.chat(ChatRequest(
                 assistant_id=os.getenv("WHATSAPP_ASSISTANT_ID"),
-                thread_id=thread_id,
+                thread_id=conversation.id if conversation else None,
                 messages=[ChatMessage(
                     role="user",
-                    content=content_items  # Send content_items directly
+                    content=content_items
                 )]
             ))
             
+            # Insert new conversation
+            if not conversation:
+                conversation = await insert_conversation(
+                    id=chat_response.thread_id,
+                    contact_id=customer.id,
+                    mode="ai"
+                )
+
             # Update thread_id if needed
             # TODO: Might need to update thread if its outdated
-            if customer and thread_id != chat_response.thread_id:
-                logger.info(f"Updating thread_id for customer {customer['phone']} from {thread_id} to {chat_response.thread_id}")
-                await update_thread_id(customer, chat_response.thread_id)
+            # if customer and conversation.id != chat_response.thread_id:
+            #     logger.info(f"Updating thread_id for customer {customer['phone']} from {conversation.id} to {chat_response.thread_id}")
+            #     await update_thread_id(customer, chat_response.thread_id)
                 
-                # DUPLICATE FUNCTIONALITY FOR MARIADB CONTACTS
-                try:
-                    from ..services.contact_service import ContactService
-                    contact_service = ContactService()
+            #     # DUPLICATE FUNCTIONALITY FOR MARIADB CONTACTS
+            #     try:
+            #         from ..services.contact_service import ContactService
+            #         contact_service = ContactService()
                     
-                    # Also update the thread_id in the contacts table
-                    await contact_service.update_thread_id(customer['phone'], chat_response.thread_id)
-                except Exception as e:
-                    log_whatsapp_message(
-                        phone_number=customer['phone'],
-                        message_type="error",
-                        message_data={"error": f"Error updating thread_id in contacts table: {str(e)}"},
-                        direction="system"
-                    )
-                    # Continue processing even if the database operation fails
-            
+            #         # Also update the thread_id in the contacts table
+            #         await contact_service.update_thread_id(customer['phone'], chat_response.thread_id)
+            #     except Exception as e:
+            #         log_whatsapp_message(
+            #             phone_number=customer['phone'],
+            #             message_type="error",
+            #             message_data={"error": f"Error updating thread_id in contacts table: {str(e)}"},
+            #             direction="system"
+            #         )
+            #         # Continue processing even if the database operation fails
+
+            # Insert conversation messages into db
+            content_items.pop(0) # Removes customer context from chat
+            await insert_message(
+                conversation_id=conversation.id,
+                contents=content_items,
+                role="user"
+            )
+
             # Send response
             if chat_response.messages:
                 assistant_message = next(
@@ -471,9 +422,18 @@ class WhatsAppService:
                             direction="outgoing"
                         )
                         
-                        await self.send_message(
+                        res = await self.send_message(
                             to=messages[0].from_,
                             message=response_text
+                        )
+
+                        res = await insert_message(
+                            conversation_id=conversation.id,
+                            contents=[{
+                                "text": response_text,
+                                "type": "text"
+                            }],
+                            role="assistant"
                         )
                     else:
                         log_whatsapp_message(
