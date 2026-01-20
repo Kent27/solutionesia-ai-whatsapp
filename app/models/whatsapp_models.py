@@ -35,9 +35,13 @@ class WhatsAppStatus(BaseModel):
     timestamp: str
     recipient_id: str
 
+class WhatsAppMetadata(BaseModel):
+    display_phone_number: str
+    phone_number_id: str
+
 class WhatsAppValue(BaseModel):
     messaging_product: str
-    metadata: dict
+    metadata: WhatsAppMetadata
     contacts: Optional[List[dict]] = None
     messages: Optional[List[dict]] = None
     statuses: Optional[List[WhatsAppStatus]] = None

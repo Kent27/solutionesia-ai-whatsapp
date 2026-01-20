@@ -15,7 +15,11 @@ class MessageStatus(str, Enum):
     FAILED = "failed"
 
 class MessageBase(BaseModel):
+    conversation_id: str = Field(..., min_length=1)
     content: str = Field(..., min_length=1)
+    content_type: Optional[str] = Field(None)
+    role: str
+    created_at: Optional[datetime] = Field(None)
     
 class MessageCreate(MessageBase):
     recipientId: str = Field(..., min_length=1)
