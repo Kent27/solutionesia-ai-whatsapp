@@ -6,7 +6,7 @@ import json
 import importlib
 from ..models.assistant_models import (
     AssistantConfig, AssistantResponse, ChatMessage, ContentItem, ImageFileContent, RunStatus, TextContent, 
-    ThreadMessages, ChatRequest, ChatResponse
+    ThreadMessages, ChatRequest, ChatResponse, RunResponse
 )
 # ManyChat functionality moved to backup folder
 # from ..backup.manychat_models import ManyChatRequest, ManyChatResponse
@@ -18,6 +18,7 @@ from typing import Optional, Dict, Any
 from ..utils.google_sheets import check_customer_exists, update_customer_name, insert_customer
 
 logger = logging.getLogger(__name__)
+
 class OpenAIAssistantService:
     def __init__(self):
         self._client = None
@@ -129,6 +130,23 @@ class OpenAIAssistantService:
         except Exception as e:
             return RunStatus(status="error", response_data={"error": str(e)})
 
+    async def resolve_thread_runs(self, thread_id: str):
+        """Resolve running 'run' of current thread"""
+        try:
+            response = await self._run_sync(self.client.beta.threads.runs.list, thread_id=thread_id)
+
+            return RunResponse(
+                success=True,
+                data=list(response.data),
+                has_more=response.has_more,
+                last_id=response.last_id
+            )
+        except Exception as e:
+            return RunResponse(
+                success=False, 
+                error=f"Unexpected Error: {str(e)}"
+            )
+
     async def wait_for_completion(self, thread_id: str, run_id: str, timeout: int = 300) -> RunStatus:
         start_time = asyncio.get_event_loop().time()
         while (asyncio.get_event_loop().time() - start_time) < timeout:
@@ -213,6 +231,9 @@ class OpenAIAssistantService:
             if not thread_id:
                 thread = await self._run_sync(self.client.beta.threads.create)
                 thread_id = thread.id
+                
+            # Resolve pending thread runs if any
+            await self.resolve_thread_runs(thread_id)
 
             # Parse the content if it's a JSON string
             message_content = request.messages[-1].content
@@ -291,6 +312,7 @@ class OpenAIAssistantService:
                         }
                         logger.error(f"OpenAI assistant run failed: {run_error}")
                     break
+                    
                     
                 await asyncio.sleep(1)
 

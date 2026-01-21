@@ -1,3 +1,5 @@
+from app.services.conversation_service import update_conversation_mode
+from app.services.whatsapp_service import WhatsAppService
 import logging
 from typing import Dict, Any
 from ..utils.google_sheets import set_chat_status
@@ -5,7 +7,7 @@ from ..functions.alert_functions import alert_admin
 
 logger = logging.getLogger(__name__)
 
-async def enable_live_chat(phone_number: str) -> Dict[str, Any]:
+async def enable_live_chat(phone_number: str, organization_id: str, conversation_id: str) -> Dict[str, Any]:
     """
     Enable Live Chat mode for a customer
     
@@ -16,6 +18,11 @@ async def enable_live_chat(phone_number: str) -> Dict[str, Any]:
         Dict: Status and message
     """
     try:
+        logger.info('[Entering enable live chat mode]')
+        logger.info(phone_number)
+        logger.info(organization_id)
+        logger.info(conversation_id)
+
         # Normalize phone number format
         phone_number = phone_number.strip()
         if not phone_number.startswith("+"):
@@ -25,22 +32,25 @@ async def enable_live_chat(phone_number: str) -> Dict[str, Any]:
             elif phone_number.startswith("0"):
                 # Convert local format to international
                 phone_number = "+62" + phone_number[1:]
-        
-        success = await set_chat_status(phone_number, "Live Chat")
-        
-        if success:
-            logger.info(f"Live Chat mode enabled for {phone_number}")
-            
-            # Alert admin about Live Chat activation
-            await alert_admin(
-                message=f"Live Chat mode has been enabled for a customer",
+        if conversation_id:
+            # Update conversation mode to "human"
+            success = await update_conversation_mode(conversation_id, "human")
+        else:
+            # Alert admin for live chat request
+            success = await alert_admin(
+                message=f"Customer asks for Live Chat",
                 severity="info",
                 context={
                     "phone_number": phone_number,
-                    "action": "Live Chat Enabled",
-                    "status": "Active"
+                    "action": "Live Chat",
+                    "status": "Active",
                 }
             )
+            
+        logger.info(success)
+
+        if success:
+            logger.info(f"Live Chat mode enabled for {phone_number}")
             
             return {
                 "status": "success",

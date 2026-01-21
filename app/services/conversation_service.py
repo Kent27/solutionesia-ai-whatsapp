@@ -11,6 +11,7 @@ class GetConversationResponse(BaseModel):
     id: str
     metadata: Dict[str, Any] | None = None
     status: str
+    mode: str = 'ai'
 
 class ConversationService:
     def __init__(self):
@@ -21,7 +22,7 @@ class ConversationService:
         try:
             # Check if contact exists for the organization
             conversation_query = """
-                SELECT conversations.id, conversations.metadata, conversations.status
+                SELECT conversations.id, conversations.metadata, conversations.status, conversations.mode
                 FROM conversations 
                 LEFT JOIN contacts 
                     ON conversations.contact_id = contacts.id
@@ -33,7 +34,8 @@ class ConversationService:
                 return GetConversationResponse(
                     id=conversation[0],
                     metadata=conversation[1],
-                    status=conversation[2]
+                    status=conversation[2],
+                    mode=conversation[3] if conversation[3] else 'ai'
                 )
 
             return None
@@ -41,7 +43,7 @@ class ConversationService:
             logger.error(f"Error getting conversation: {str(e)}", exc_info=True)
             raise
     
-    async def update_conversation_mode(self, id: str, mode: str):
+    async def update_conversation_mode(self, id: str, mode: str) -> bool:
         """Update conversation mode to 'ai' or 'human' """
         try:
             update_query = """
@@ -50,6 +52,7 @@ class ConversationService:
                 WHERE id = %s
             """
             await self.db.execute(update_query, (mode, id))
+            return True
         except Exception as e:
             logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
             raise
@@ -65,7 +68,7 @@ class ConversationService:
             await self.db.execute(insert_query, (id, contact_id, mode))
             
             fetch_query = """
-                SELECT id, metadata, status
+                SELECT id, metadata, status, mode
                 FROM conversations 
                 WHERE contact_id = %s AND status = 'active'
                 ORDER BY id DESC
@@ -77,7 +80,8 @@ class ConversationService:
                 return GetConversationResponse(
                     id=conversation[0],
                     metadata=conversation[1],
-                    status=conversation[2]
+                    status=conversation[2],
+                    mode=conversation[3]
                 )
             return None
         except Exception as e:
@@ -129,3 +133,4 @@ conversation_service = ConversationService()
 get_conversation = conversation_service.get_conversation
 insert_message = conversation_service.insert_message
 insert_conversation = conversation_service.insert_conversation
+update_conversation_mode = conversation_service.update_conversation_mode

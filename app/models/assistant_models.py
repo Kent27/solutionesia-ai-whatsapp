@@ -100,3 +100,10 @@ class ChatResponse(BaseModel):
     messages: Optional[List[ChatMessage]] = None
     status: str
     error: Optional[Dict[str, Any]] = None
+
+class RunResponse(BaseModel):
+    success: bool
+    data: List[Any] = Field(default_factory=list)
+    error: Optional[str] = None
+    has_more: bool = False
+    last_id: Optional[str] = None

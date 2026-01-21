@@ -90,7 +90,10 @@ class WhatsAppService:
     async def verify_webhook(self, mode: str, token: str, challenge: str) -> int:
         """Verify WhatsApp webhook"""
         verify_token = os.getenv("WHATSAPP_VERIFY_TOKEN")
+        logger.info(f"Verifying webhook: mode={mode}, token={token}, challenge={challenge}, verify_token={verify_token}")   
+
         if mode == "subscribe" and token == verify_token:
+            logger.info("Webhook verified successfully")
             return int(challenge)
         raise ValueError("Invalid verification token")
 
@@ -257,10 +260,8 @@ class WhatsAppService:
             organization_id = str(organization['id'])
             customer = await get_customer(messages[0].from_, contact.profile.name, organization_id)
             
-            if not customer:
-                 return {"status": "error", "message": "Failed to get or create customer"}
-
             conversation = await get_conversation(customer.id, organization_id)
+
             # TODO: To be migrated into function call
             # # Check if customer is in "human" mode - if so, skip AI processing
             # # But don't skip if it's the admin's number
@@ -291,9 +292,12 @@ class WhatsAppService:
 
             # Add customer information as context at the beginning
             customer_context = f"Customer: {contact.profile.name}, Phone: {messages[0].from_}"
+            organization_context = f"Organization: {organization['name']}, ID: {organization['id']}"
+            conversation_context = f"Conversation ID: {conversation.id if hasattr(conversation, 'id') else 'Unknown'}"
+            
             content_items.append({
                 "type": "text",
-                "text": customer_context
+                "text": customer_context + "\n" + organization_context + "\n" + conversation_context
             })
             
             for message in messages:
@@ -351,6 +355,31 @@ class WhatsAppService:
                             message="Maaf, terjadi kesalahan saat memproses gambar. Mohon coba lagi."
                         )
                         return {"status": "error", "message": str(e)}
+           
+            # Check if customer is in "human" mode or is admin phone number - if so, skip AI processing
+            admin_phone = os.getenv('ADMIN_WHATSAPP_NUMBER')
+            is_admin = admin_phone and messages[0].from_ == admin_phone
+
+            if not conversation or conversation.mode == 'human' or is_admin:
+                logger.info(f"Customer {messages[0].from_} is in human mode or is admin - skipping AI processing")
+                if not conversation:
+                    thread = await self.assistant_service.create_thread()
+                    conversation = await insert_conversation(
+                        id=thread.id,
+                        contact_id=customer.id,
+                        mode="human"
+                    )
+
+                # Removes chat context
+                content_items.pop(0)
+                
+                res = await self.process_human_chat(conversation.id, content_items)
+
+                if res.get('status') == 'error':
+                    logger.error(f"Error processing human chat: {res.get('message')}")
+                    return {"status": "error", "message": "Error processing human chat"}
+
+                return res
 
             # Get AI response with all message contents and metadata
             chat_response = await self.assistant_service.chat(ChatRequest(
@@ -572,4 +601,16 @@ class WhatsAppService:
                 direction="system"
             )
             
+            return {"status": "error", "message": str(e)}
+
+    async def process_human_chat(self, conversation_id: str, contents: List[Dict[str,Any]]) -> Dict[str, Any]:
+        try:
+            await insert_message(
+                conversation_id=conversation_id,
+                contents=contents,
+                role="user"
+            )
+            return {"status": "success"}
+        except Exception as e:
+            logger.error(f"Error processing human chat: {str(e)}", exc_info=True)
             return {"status": "error", "message": str(e)}

@@ -150,6 +150,18 @@
                     "type": "string",
                     "description": "Nomor telepon pelanggan",
                     "required": true
+                },
+                {
+                    "name": "organization_id",
+                    "type": "string",
+                    "description": "ID organisasi",
+                    "required": true
+                },
+                {
+                    "name": "conversation_id",
+                    "type": "string",
+                    "description": "ID conversation",
+                    "required": false
                 }
             ],
             "response": {
