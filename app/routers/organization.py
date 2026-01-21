@@ -17,7 +17,6 @@ router = APIRouter(prefix="/organizations", tags=["Organization"])
 logger = logging.getLogger(__name__)
 
 org_service = OrganizationService()
-auth_service = OrganizationAuthService()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="organization/login")
 
