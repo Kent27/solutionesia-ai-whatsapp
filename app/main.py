@@ -5,7 +5,7 @@ load_dotenv()
 
 from fastapi import FastAPI, Request
 import os
-from .routers import assistant_router, whatsapp, auth, message, contact, label, whatsapp_api, document
+from .routers import assistant_router, whatsapp, auth, message, contact, label, whatsapp_api, document, organization
 from .utils.app_logger import app_logger, log_request, setup_app_logger
 import datetime
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +36,7 @@ app.include_router(contact.router)
 app.include_router(label.router)
 app.include_router(whatsapp_api.router)
 app.include_router(document.router)
+app.include_router(organization.router)
 
 # Configure logging middleware
 @app.middleware("http")

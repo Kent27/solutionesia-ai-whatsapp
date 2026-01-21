@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from ..models.auth_models import UserLogin, UserRegister, UserResponse, AuthResponse
+from ..models.auth_models import UserLogin, UserRegister, UserResponse, AuthResponse, UserNameUpdate
 from ..services.auth_service import AuthService
+from ..utils.auth_utils import get_current_user
 from typing import Dict, Any
 import logging
 
@@ -92,4 +93,37 @@ async def register(user_data: UserRegister) -> Dict[str, Any]:
         raise HTTPException(
             status_code=500,
             detail=f"Error during registration: {str(e)}"
+        )
+
+@router.put("/username", response_model=Dict[str, str])
+async def update_username(
+    user_data: UserNameUpdate,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+) -> Dict[str, str]:
+    """
+    Update the authenticated user's name
+    """
+    try:
+        user_id = current_user["id"]
+        logger.info(f"Update username request for user_id: {user_id}")
+        
+        result = await auth_service.update_user_name(
+            user_id=user_id,
+            new_name=user_data.name
+        )
+        
+        if not result:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to update user name"
+            )
+            
+        return {"message": "User name updated successfully"}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error(f"Error updating username: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error updating username: {str(e)}"
         ) 

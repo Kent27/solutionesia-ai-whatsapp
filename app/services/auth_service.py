@@ -125,4 +125,16 @@ class AuthService:
             }
         except Exception as e:
             logger.error(f"Error authenticating user: {str(e)}", exc_info=True)
-            return None 
+            return None
+
+    async def update_user_name(self, user_id: str, new_name: str) -> bool:
+        """Update user's name"""
+        try:
+            logger.info(f"Updating user name for user_id: {user_id}")
+            query = "UPDATE users SET name = %s WHERE id = %s"
+            await self.db.execute(query, (new_name, user_id))
+            logger.info(f"Successfully updated user name for user_id: {user_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error updating user name: {str(e)}", exc_info=True)
+            return False 

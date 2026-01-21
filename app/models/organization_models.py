@@ -6,8 +6,8 @@ import re
 # Organization Models
 class OrganizationBase(BaseModel):
     name: str = Field(..., min_length=1)
-    email: Optional[str] = Field(None)
-    status: Optional[str] = Field(None)
+    email: str = Field(..., min_length=1)
+    status: str = Field(..., min_length=1)
 
     @validator('email')
     def validate_email(cls, v):
@@ -16,8 +16,8 @@ class OrganizationBase(BaseModel):
         return v
 
 class OrganizationCreate(OrganizationBase):
-    phone_id: str = Field(..., min_length=1)  # Required for creation
-    password: Optional[str] = Field(None)
+    phone_id: str | None = Field(None, min_length=1)  
+    agent_id: str | None = Field(None, min_length=1)  
 
 class OrganizationUpdateStatus(BaseModel):
     status: str
@@ -95,8 +95,18 @@ class OrganizationUserBase(BaseModel):
 class OrganizationUserCreate(OrganizationUserBase):
     pass
 
-class OrganizationUserResponse(OrganizationUserBase):
+class OrganizationUserInvite(BaseModel):
+    email: str
+    role_id: str
+
+class OrganizationUserUpdate(BaseModel):
+    role_id: str
+
+class OrganizationUserResponse(BaseModel):
     id: str
+    user: dict  # Contains user info like name, email
+    role: dict  # Contains role info like name
+    organization_id: str
     created_at: datetime
     updated_at: datetime
 

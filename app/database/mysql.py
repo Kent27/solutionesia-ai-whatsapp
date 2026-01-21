@@ -35,14 +35,20 @@ class MariaDBClient:
                     logger.debug(f"Executing query: {query}")
                     await cur.execute(query, params)
                     
-                    if query.upper().startswith('INSERT'):
-                        lastrowid = cur.lastrowid
-                        rowcount = cur.rowcount
+                    rowcount = cur.rowcount
+                    lastrowid = cur.lastrowid
+                    
+                    if query.upper().strip().startswith('INSERT'):
                         logger.debug(f"Insert successful - lastrowid: {lastrowid}, rowcount: {rowcount}")
                         return {
                             "id": lastrowid,
                             "affected_rows": rowcount
                         }
+                    elif query.upper().strip().startswith(('UPDATE', 'DELETE')):
+                         logger.debug(f"Update/Delete successful - rowcount: {rowcount}")
+                         return {
+                             "affected_rows": rowcount
+                         }
                     return None
                 except Exception as e:
                     logger.error(f"Error executing query: {str(e)}", exc_info=True)

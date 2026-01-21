@@ -4,15 +4,16 @@ from fastapi.security import OAuth2PasswordBearer
 from typing import List
 from ..models.organization_models import (
     OrganizationCreate, OrganizationResponse, OrganizationLogin, 
-    Token, OrganizationUpdateStatus, OrganizationUpdateProfile
+    Token, OrganizationUpdateStatus, OrganizationUpdateProfile,
+    OrganizationUserInvite, OrganizationUserUpdate, OrganizationUserResponse
 )
 from ..services.organization_service import OrganizationService
-from ..services.organization_auth_service import OrganizationAuthService
+from ..utils.auth_utils import get_current_admin_user, get_current_user
 import logging
 import jwt as pyjwt
 import os
 
-router = APIRouter(prefix="/organization", tags=["Organization"])
+router = APIRouter(prefix="/organizations", tags=["Organization"])
 logger = logging.getLogger(__name__)
 
 org_service = OrganizationService()
@@ -20,27 +21,11 @@ auth_service = OrganizationAuthService()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="organization/login")
 
-async def get_current_organization(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = pyjwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
-        email: str = payload.get("email")
-        if email is None:
-            raise credentials_exception
-    except pyjwt.PyJWTError:
-        raise credentials_exception
-    
-    org = await auth_service.get_organization_by_email(email)
-    if org is None:
-        raise credentials_exception
-    return org
-
 @router.post("/register", response_model=OrganizationResponse)
-async def register_organization(org_data: OrganizationCreate):
+async def register_organization(
+    org_data: OrganizationCreate,
+    _: dict = Depends(get_current_admin_user)
+):
     try:
         org = await org_service.create_organization(org_data)
         if not org:
@@ -52,17 +37,6 @@ async def register_organization(org_data: OrganizationCreate):
         import traceback
         return JSONResponse(status_code=500, content={"detail": str(e), "trace": traceback.format_exc()})
 
-@router.post("/login", response_model=Token)
-async def login_organization(login_data: OrganizationLogin):
-    auth_result = await auth_service.authenticate_organization(login_data.email, login_data.password)
-    if not auth_result:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return {"access_token": auth_result["token"], "token_type": "bearer"}
-
 @router.put("/{org_id}/status", response_model=OrganizationResponse)
 async def update_organization_status(org_id: str, status_data: OrganizationUpdateStatus):
     # Unprotected as per user request
@@ -71,13 +45,116 @@ async def update_organization_status(org_id: str, status_data: OrganizationUpdat
         raise HTTPException(status_code=404, detail="Organization not found")
     return org
 
-@router.put("/me", response_model=OrganizationResponse)
-async def update_organization_profile(
-    profile_data: OrganizationUpdateProfile,
-    current_org: dict = Depends(get_current_organization)
+
+@router.get("/{org_id}/users", response_model=List[OrganizationUserResponse])
+async def get_organization_users(
+    org_id: str,
+    current_user: dict = Depends(get_current_user)
 ):
-    org_id = current_org['id']
-    org = await org_service.update_profile(org_id, profile_data)
-    if not org:
-        raise HTTPException(status_code=400, detail="Could not update profile")
-    return org
+    """
+    Get all users in an organization.
+    Allowed for: App Admin or Member of the organization.
+    """
+    try:
+        user_id = current_user["id"]
+        
+        # Check permissions
+        is_member = await org_service.check_is_org_member(org_id, user_id)
+        
+        if is_member:
+             return await org_service.get_organization_users(org_id)
+
+        # Helper to check app admin if not member
+        if await CheckIsAppAdmin(user_id):
+            return await org_service.get_organization_users(org_id)
+            
+        raise HTTPException(status_code=403, detail="Not authorized to view organization users")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting org users: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.post("/{org_id}/users/invite", response_model=OrganizationUserResponse)
+async def invite_user_to_organization(
+    org_id: str,
+    invite_data: OrganizationUserInvite,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Invite a user to the organization.
+    Allowed for: Organization Admin.
+    """
+    try:
+        user_id = current_user["id"]
+        if not await org_service.check_is_org_admin(org_id, user_id):
+            raise HTTPException(status_code=403, detail="Only organization admins can invite users")
+            
+        result = await org_service.invite_user(org_id, invite_data.email, invite_data.role_id)
+        return result
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error inviting user: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.put("/{org_id}/users/{target_user_id}", response_model=OrganizationUserResponse)
+async def update_organization_user_role(
+    org_id: str,
+    target_user_id: str,
+    update_data: OrganizationUserUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Update a user's role in the organization.
+    Allowed for: Organization Admin.
+    """
+    try:
+        user_id = current_user["id"]
+        if not await org_service.check_is_org_admin(org_id, user_id):
+            raise HTTPException(status_code=403, detail="Only organization admins can update roles")
+            
+        result = await org_service.update_user_role(org_id, target_user_id, update_data.role_id)
+        if not result:
+             raise HTTPException(status_code=404, detail="User not found in organization")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating org user: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.delete("/{org_id}/users/{target_user_id}")
+async def remove_user_from_organization(
+    org_id: str,
+    target_user_id: str,
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """
+    Remove a user from the organization.
+    Allowed for: App Admin only.
+    """
+    try:
+        success = await org_service.remove_user(org_id, target_user_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="User not found in organization")
+        return {"message": "User removed from organization"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error removing org user: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+async def CheckIsAppAdmin(user_id: str) -> bool:
+     try:
+          query = "SELECT r.name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = %s"
+          res = await org_service.db.fetch_one(query, (user_id,))
+          if res and res[0] == 'admin':
+               return True
+          return False
+     except:
+          return False
+
