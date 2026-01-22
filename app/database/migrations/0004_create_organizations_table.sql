@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS organization_users (
     user_id BIGINT NOT NULL,
     organization_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
+    phone_number VARCHAR(255) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id),

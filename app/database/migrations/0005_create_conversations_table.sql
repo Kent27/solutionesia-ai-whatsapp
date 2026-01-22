@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS messages (
     INDEX idx_conv_messages (conversation_id, created_at)
 );
 
-CREATE TABLE IF NOT EXISTS memory_units (
+CREATE TABLE IF NOT EXISTS short_term_memories (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conversation_id VARCHAR(255) NOT NULL,
     abstracted_content TEXT,
@@ -30,5 +30,18 @@ CREATE TABLE IF NOT EXISTS memory_units (
     consolidation_level INT DEFAULT 0,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
     INDEX idx_mem_conv_time (conversation_id, timestamp),
+    INDEX idx_mem_level (consolidation_level)
+);
+
+CREATE TABLE IF NOT EXISTS long_term_memories (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    contact_id BIGINT NOT NULL,
+    abstracted_content TEXT,
+    embedding_vector BLOB,
+    keywords JSON,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    consolidation_level INT DEFAULT 0,
+    FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE,
+    INDEX idx_mem_conv_time (contact_id, timestamp),
     INDEX idx_mem_level (consolidation_level)
 );

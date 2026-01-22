@@ -1,3 +1,4 @@
+# from app.services.memory_service import MemoryService
 import os
 from typing import Optional, Dict, Any, List
 from ..database.mysql import MariaDBClient
@@ -55,9 +56,38 @@ class ConversationService:
             return True
         except Exception as e:
             logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
-            raise
-    
+            raise Exception("Failed to update conversation mode")
 
+    async def update_conversation_status(self, id: str, status: str) -> bool:
+        """Update conversation mode to 'ai' or 'human' """
+        try:
+            # Ensure single 'active' conversation
+            if status == 'active':
+                query = """
+                    SELECT id 
+                    FROM conversations 
+                    WHERE id = %s AND status = 'active'
+                """
+
+                result = await self.db.fetch_one(query, (id,))
+
+                if result:
+                    raise Exception("Another conversation is 'active'")
+            
+            update_query = """
+                UPDATE conversations 
+                SET status = %s 
+                WHERE id = %s
+            """
+            
+            await self.db.execute(update_query, (status, id))
+
+            return True
+        except Exception as e:
+            logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
+            raise Exception("Failed to update conversation status")
+
+    
     async def insert_conversation(self, id: str, contact_id: str, mode: str) -> GetConversationResponse:
         """Create a new conversation"""
         try:
@@ -83,14 +113,17 @@ class ConversationService:
                     status=conversation[2],
                     mode=conversation[3]
                 )
-            return None
+            else:
+                raise Exception("Failed to create conversation")
         except Exception as e:
             logger.error(f"Error creating conversation: {str(e)}", exc_info=True)
             raise
     
-    async def insert_message(self, conversation_id: str, contents: List[Dict[str, Any]], role: str):
+    async def insert_message(self, contact_id: str, conversation_id: str, contents: List[Dict[str, Any]], role: str):
         """Insert messages into conversation"""
         try:
+            # memory_service = MemoryService(contact_id)
+
             insert_query = """
                 INSERT INTO messages (conversation_id, content, content_type, role)
                 VALUES (%s, %s, %s, %s)
@@ -117,12 +150,19 @@ class ConversationService:
                 row = (conversation_id, content, type, role)
                 data_to_insert.append(row)
 
+                # memory_service.add_message(
+                #     role=role,
+                #     content=str(content),
+                #     conversation_id=conversation_id,
+                #     timestamp=datetime.now().isoformat()
+                # )
+
             pool = await self.db.get_pool()
             async with pool.acquire() as conn:
                 async with conn.cursor() as cur:
                     await cur.executemany(insert_query, data_to_insert)
                     await conn.commit()
-                    
+                               
         except Exception as e:
             logger.error(f"Error bulk inserting messages: {str(e)}", exc_info=True)
             raise
@@ -134,3 +174,4 @@ get_conversation = conversation_service.get_conversation
 insert_message = conversation_service.insert_message
 insert_conversation = conversation_service.insert_conversation
 update_conversation_mode = conversation_service.update_conversation_mode
+update_conversation_status = conversation_service.update_conversation_status

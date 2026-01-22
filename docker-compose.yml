@@ -9,6 +9,7 @@ services:
       - MYSQL_PASSWORD=${MARIADB_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
+      - simplemem_data:/app/memory_db
       - ./app/database/migrations:/docker-entrypoint-initdb.d
     ports:
       - "${MARIADB_HOST_PORT:-3307}:${MARIADB_PORT:-3306}"

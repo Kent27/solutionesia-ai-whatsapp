@@ -1,3 +1,4 @@
+from app.services.memory_service import MemoryService
 from app.services.conversation_service import insert_conversation
 from app.services.conversation_service import get_conversation
 from app.services.conversation_service import insert_message
@@ -260,32 +261,8 @@ class WhatsAppService:
             organization_id = str(organization['id'])
             customer = await get_customer(messages[0].from_, contact.profile.name, organization_id)
             
+            logger.info('Getting conversation')
             conversation = await get_conversation(customer.id, organization_id)
-
-            # TODO: To be migrated into function call
-            # # Check if customer is in "human" mode - if so, skip AI processing
-            # # But don't skip if it's the admin's number
-            # admin_phone = os.getenv('ADMIN_WHATSAPP_NUMBER')
-            # is_admin = admin_phone and messages[0].from_ == admin_phone
-            
-            # # Skips AI processing
-            # if customer and conversation.mode == "human" and not is_admin:
-            #     logger.info(f"Customer {messages[0].from_} is in human mode. Skipping AI processing.")
-            #     log_whatsapp_message(
-            #         phone_number=messages[0].from_,
-            #         message_type="system",
-            #         message_data={"message": "human mode active - AI processing skipped"},
-            #         direction="system"
-            #     )
-            #     return {"status": "success", "message": "human mode active - AI processing skipped"}
-            # elif customer and conversation.mode == "human" and is_admin:
-            #     logger.info(f"Admin {messages[0].from_} is in human mode but will still get AI responses.")
-            #     log_whatsapp_message(
-            #         phone_number=messages[0].from_,
-            #         message_type="system",
-            #         message_data={"message": "Admin override - AI processing continues despite human mode"},
-            #         direction="system"
-            #     )
             
             # Process all messages
             content_items: List[Dict] = []
@@ -300,6 +277,7 @@ class WhatsAppService:
                 "text": customer_context + "\n" + organization_context + "\n" + conversation_context
             })
             
+            logger.info('Compiling messages')
             for message in messages:
                 if message.type == "text":
                     content_items.append({
@@ -357,15 +335,17 @@ class WhatsAppService:
                         return {"status": "error", "message": str(e)}
            
             # Check if customer is in "human" mode or is admin phone number - if so, skip AI processing
-            admin_phone = os.getenv('ADMIN_WHATSAPP_NUMBER')
-            is_admin = admin_phone and messages[0].from_ == admin_phone
+            org_phones = await self.organization_service.get_organization_phones(str(organization['id']))
+            is_admin = messages[0].from_ in org_phones
 
-            if not conversation or conversation.mode == 'human' or is_admin:
+            logger.info('Determining conversation mode')
+            # Assume user is 'admin' if conversation is not exist
+            if (conversation and conversation.mode == 'human') or is_admin:
                 logger.info(f"Customer {messages[0].from_} is in human mode or is admin - skipping AI processing")
                 if not conversation:
                     thread = await self.assistant_service.create_thread()
                     conversation = await insert_conversation(
-                        id=thread.id,
+                        id=thread.thread_id,
                         contact_id=customer.id,
                         mode="human"
                     )
@@ -373,7 +353,11 @@ class WhatsAppService:
                 # Removes chat context
                 content_items.pop(0)
                 
-                res = await self.process_human_chat(conversation.id, content_items)
+                res = await self.process_human_chat(
+                    conversation_id=conversation.id,
+                    customer_id=customer.id,
+                    contents=content_items
+                )
 
                 if res.get('status') == 'error':
                     logger.error(f"Error processing human chat: {res.get('message')}")
@@ -381,9 +365,17 @@ class WhatsAppService:
 
                 return res
 
+            # Ensure organization has an agent ID
+            if not organization['agent_id']:
+                return {
+                    "status": "error",
+                    "message": "Organization agent ID not found"
+                }
+
+            logger.info('Getting AI response')
             # Get AI response with all message contents and metadata
             chat_response = await self.assistant_service.chat(ChatRequest(
-                assistant_id=os.getenv("WHATSAPP_ASSISTANT_ID"),
+                assistant_id=organization['agent_id'],
                 thread_id=conversation.id if conversation else None,
                 messages=[ChatMessage(
                     role="user",
@@ -392,6 +384,7 @@ class WhatsAppService:
             ))
             
             # Insert new conversation
+            logger.info('Inserting new conversation')
             if not conversation:
                 conversation = await insert_conversation(
                     id=chat_response.thread_id,
@@ -424,6 +417,7 @@ class WhatsAppService:
             # Insert conversation messages into db
             content_items.pop(0) # Removes customer context from chat
             await insert_message(
+                contact_id=customer.id,
                 conversation_id=conversation.id,
                 contents=content_items,
                 role="user"
@@ -457,6 +451,7 @@ class WhatsAppService:
                         )
 
                         res = await insert_message(
+                            contact_id=customer.id,
                             conversation_id=conversation.id,
                             contents=[{
                                 "text": response_text,
@@ -603,14 +598,17 @@ class WhatsAppService:
             
             return {"status": "error", "message": str(e)}
 
-    async def process_human_chat(self, conversation_id: str, contents: List[Dict[str,Any]]) -> Dict[str, Any]:
+    async def process_human_chat(self, conversation_id: str, customer_id: str, contents: List[Dict[str,Any]]) -> Dict[str, Any]:
         try:
             await insert_message(
                 conversation_id=conversation_id,
+                contact_id=customer_id,
                 contents=contents,
                 role="user"
             )
+
             return {"status": "success"}
         except Exception as e:
             logger.error(f"Error processing human chat: {str(e)}", exc_info=True)
             return {"status": "error", "message": str(e)}
+    

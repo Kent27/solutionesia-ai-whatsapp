@@ -22,6 +22,14 @@ class UserResponse(UserBase):
 class UserNameUpdate(BaseModel):
     name: str = Field(..., min_length=2)
 
+class AuthUserResponse(UserBase):
+    id: str
+    name: str
+    password: str
+
+    class Config:
+        from_attributes = True
+
 class AuthResponse(BaseModel):
     user: UserResponse
     token: str 

@@ -1,11 +1,12 @@
 
+# from app.services.memory_service import init_simplemem
 from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
 from fastapi import FastAPI, Request
 import os
-from .routers import assistant_router, whatsapp, auth, message, contact, label, whatsapp_api, document, organization
+from .routers import assistant_router, whatsapp, auth, message, contact, label, whatsapp_api, document, organization, conversation
 from .utils.app_logger import app_logger, log_request, setup_app_logger
 import datetime
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,9 @@ import logging
 # Set up logging
 setup_app_logger()
 logger = logging.getLogger(__name__)
+
+# Init SimpleMem
+# init_simplemem()
 
 # Initialize FastAPI
 app = FastAPI(title="Solutionesia AI WhatsApp API")
@@ -37,6 +41,7 @@ app.include_router(label.router)
 app.include_router(whatsapp_api.router)
 app.include_router(document.router)
 app.include_router(organization.router)
+app.include_router(conversation.router)
 
 # Configure logging middleware
 @app.middleware("http")

@@ -23,6 +23,12 @@ class ConversationsListResponse(BaseModel):
     page: int
     limit: int
 
+class ConversationModeUpdate(BaseModel):
+    mode: str = Field(..., pattern="^(human|ai)$", description="Mode of the conversation: 'human' or 'ai'")
+
+class ConversationStatusUpdate(BaseModel):
+    status: str = Field(..., pattern="^(active|inactive)$", description="Status of the conversation: 'active' or 'inactive'")
+
 # Message Models
 class MessageBase(BaseModel):
     conversation_id: str

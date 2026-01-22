@@ -18,6 +18,8 @@ class OrganizationBase(BaseModel):
 class OrganizationCreate(OrganizationBase):
     phone_id: str | None = Field(None, min_length=1)  
     agent_id: str | None = Field(None, min_length=1)  
+    password: str | None = Field(None, min_length=8)
+    phone_number: str | None = Field(None, min_length=8)
 
 class OrganizationUpdateStatus(BaseModel):
     status: str
@@ -38,6 +40,7 @@ class OrganizationLogin(BaseModel):
 
 class GetOrganizationResponse(OrganizationBase):
     id: int
+    agent_id: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -97,7 +100,6 @@ class OrganizationUserCreate(OrganizationUserBase):
 
 class OrganizationUserInvite(BaseModel):
     email: str
-    role_id: str
 
 class OrganizationUserUpdate(BaseModel):
     role_id: str
@@ -112,3 +114,6 @@ class OrganizationUserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class OrganizationUpdateUserPhoneNumber(BaseModel):
+    phone_number: str

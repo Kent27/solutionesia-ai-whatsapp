@@ -1,3 +1,4 @@
+from app.routers.auth import auth_service
 from app.models.organization_models import GetOrganizationResponse
 import logging
 from typing import Optional, Dict, Any, List
@@ -34,7 +35,7 @@ class OrganizationService:
     async def get_organization_by_phone_id(self, phone_id: str) -> Optional[GetOrganizationResponse]:
         """Get organization by phone_id"""
         try:
-            query = "SELECT id, name, email, status FROM organizations WHERE phone_id = %s"
+            query = "SELECT id, name, email, status, agent_id FROM organizations WHERE phone_id = %s"
             result = await self.db.fetch_one(query, (phone_id,))
             
             if result:
@@ -42,7 +43,8 @@ class OrganizationService:
                     "id": result[0],
                     "name": result[1],
                     "email": result[2],
-                    "status": result[3]
+                    "status": result[3],
+                    "agent_id": result[4]
                 }
             return None
         except Exception as e:
@@ -183,7 +185,22 @@ class OrganizationService:
             logger.error(f"Error getting organization users: {str(e)}", exc_info=True)
             raise
 
-    async def invite_user(self, org_id: str, email: str, role_id: str) -> Optional[Dict[str, Any]]:
+    async def get_organization_phones(self, org_id: str) -> List[str]:
+        """Get all phones in an organization"""
+        try:
+            query = """
+                SELECT phone_number
+                FROM organization_users ou
+                WHERE ou.organization_id = %s
+            """
+            rows = await self.db.fetch_all(query, (org_id,))
+            
+            return [r[0] for r in rows]
+        except Exception as e:
+            logger.error(f"Error getting organization users: {str(e)}", exc_info=True)
+            raise
+
+    async def invite_user(self, org_id: str, email: str, role_id: str | None = None) -> Optional[Dict[str, Any]]:
         """Invite existing user to organization"""
         try:
             # Check if user exists
@@ -198,6 +215,10 @@ class OrganizationService:
             check_query = "SELECT id FROM organization_users WHERE organization_id = %s AND user_id = %s"
             if await self.db.fetch_one(check_query, (org_id, user_id)):
                 raise ValueError("User is already in this organization")
+            
+            role_id = role_id if role_id else str(await auth_service.get_role_id("user"))
+            if not role_id:
+                raise ValueError("User role not found")
                 
             # Insert
             query = """
@@ -254,6 +275,16 @@ class OrganizationService:
         try:
             query = "UPDATE organization_users SET role_id = %s WHERE organization_id = %s AND user_id = %s"
             await self.db.execute(query, (role_id, org_id, user_id))
+            return await self.get_organization_user(org_id, user_id)
+        except Exception as e:
+            logger.error(f"Error updating org user role: {str(e)}", exc_info=True)
+            raise
+
+    async def update_user_phone_number(self, org_id: str, user_id: str, phone_number: str) -> Optional[Dict[str, Any]]:
+        """Update user phone number in organization"""
+        try:
+            query = "UPDATE organization_users SET phone_number = %s WHERE organization_id = %s AND user_id = %s"
+            await self.db.execute(query, (phone_number, org_id, user_id))
             return await self.get_organization_user(org_id, user_id)
         except Exception as e:
             logger.error(f"Error updating org user role: {str(e)}", exc_info=True)
