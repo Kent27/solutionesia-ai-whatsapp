@@ -660,7 +660,7 @@
             "auth": {
               "type": "noauth"
             },
-            "method": "GET",
+            "method": "POST",
             "header": [],
             "url": {
               "raw": "https://graph.facebook.com/v24.0/659414163861157/subscribed_apps?access_token=EAAMWxJUwZC9wBQldp2C0ZBVmqahumapki6GE0wBhHdYM5zIQvC1MydJljjD35nxrAc4RcdDyQD7ZBQVto5CZCDcN3GyrIZBTnD2iCshZCQ7k5zHHZCo9ISo7ZBqJO0WSJZCU0x2APVO07xielbJ7sJCtYnhMO1QzsCLRZAUQup8x17EjJb45L07T5Ng0DfYpl1WblXdQZDZD",
