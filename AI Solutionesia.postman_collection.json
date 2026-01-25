@@ -542,6 +542,38 @@
           "response": []
         },
         {
+          "name": "Chat Whatsapp Local",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"object\": \"whatsapp_business_account\",\n    \"entry\": [\n        {\n            \"id\": \"529942286877576\",\n            \"changes\": [\n                {\n                    \"value\": {\n                        \"messaging_product\": \"whatsapp\",\n                        \"metadata\": {\n                            \"display_phone_number\": \"15551873800\",\n                            \"phone_number_id\": \"949675011562911\"\n                        },\n                        \"contacts\": [\n                            {\n                                \"profile\": {\n                                    \"name\": \"Kent\"\n                                },\n                                \"wa_id\": \"6281288477837\"\n                            }\n                        ],\n                        \"messages\": [\n                            {\n                                \"from\": \"6281288477837\",\n                                \"id\": \"wamid.test1234567897\",  // ← Change this to a unique value\n                                \"timestamp\": \"1768658472\",\n                                \"type\": \"text\",\n                                \"text\": {\n                                    \"body\": \"jual apa sih\"\n                                }\n                            }\n                        ]\n                    },\n                    \"field\": \"messages\"\n                }\n            ]\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8085/whatsapp/webhook",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8085",
+              "path": [
+                "whatsapp",
+                "webhook"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get Whatsapp Contact",
           "request": {
             "auth": {
@@ -617,6 +649,37 @@
                 "v22.0",
                 "949675011562911",
                 "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Graph Subscribe App",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v24.0/659414163861157/subscribed_apps?access_token=EAAMWxJUwZC9wBQldp2C0ZBVmqahumapki6GE0wBhHdYM5zIQvC1MydJljjD35nxrAc4RcdDyQD7ZBQVto5CZCDcN3GyrIZBTnD2iCshZCQ7k5zHHZCo9ISo7ZBqJO0WSJZCU0x2APVO07xielbJ7sJCtYnhMO1QzsCLRZAUQup8x17EjJb45L07T5Ng0DfYpl1WblXdQZDZD",
+              "protocol": "https",
+              "host": [
+                "graph",
+                "facebook",
+                "com"
+              ],
+              "path": [
+                "v24.0",
+                "659414163861157",
+                "subscribed_apps"
+              ],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "EAAMWxJUwZC9wBQldp2C0ZBVmqahumapki6GE0wBhHdYM5zIQvC1MydJljjD35nxrAc4RcdDyQD7ZBQVto5CZCDcN3GyrIZBTnD2iCshZCQ7k5zHHZCo9ISo7ZBqJO0WSJZCU0x2APVO07xielbJ7sJCtYnhMO1QzsCLRZAUQup8x17EjJb45L07T5Ng0DfYpl1WblXdQZDZD"
+                }
               ]
             }
           },
