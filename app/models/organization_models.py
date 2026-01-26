@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 from datetime import datetime
 import re
+from .contact_models import ContactResponse, ContactsListResponse
+from .conversation_models import ConversationResponse
 
 # Organization Models
 class OrganizationBase(BaseModel):
@@ -66,6 +68,16 @@ class OrganizationsListResponse(BaseModel):
     page: int
     limit: int
 
+class OrganizationContactWithConversationsResponse(ContactResponse):
+    conversations: List[ConversationResponse] 
+
+class OrganizationContactsListResponse(BaseModel):
+    items: List[OrganizationContactWithConversationsResponse]
+    total: int
+    page: int
+    limit: int
+    pages: int
+
 # Role Models
 class RoleBase(BaseModel):
     name: str = Field(..., min_length=1)
@@ -117,3 +129,9 @@ class OrganizationUserResponse(BaseModel):
 
 class OrganizationUpdateUserPhoneNumber(BaseModel):
     phone_number: str
+
+class ConversationFilter(BaseModel):
+    mode: Optional[str] = Field(None, pattern="^(human|ai)$")
+    status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+    page: int = 1
+    limit: int = 10

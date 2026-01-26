@@ -18,12 +18,10 @@ class MessageBase(BaseModel):
     conversation_id: str = Field(..., min_length=1)
     content: str = Field(..., min_length=1)
     content_type: Optional[str] = Field(None)
-    role: str
-    created_at: Optional[datetime] = Field(None)
+    role: str = Field(default='admin')
     
 class MessageCreate(MessageBase):
-    recipientId: str = Field(..., min_length=1)
-    recipientType: RecipientType = Field(default=RecipientType.CONTACT)
+    pass
 
 class MessageResponse(MessageBase):
     id: str

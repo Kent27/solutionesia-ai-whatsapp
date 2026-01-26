@@ -330,7 +330,8 @@ class WhatsAppService:
                         )
                         await self.send_message(
                             to=messages[0].from_,
-                            message="Maaf, terjadi kesalahan saat memproses gambar. Mohon coba lagi."
+                            message="Maaf, terjadi kesalahan saat memproses gambar. Mohon coba lagi.",
+                            phone_id=phone_id
                         )
                         return {"status": "error", "message": str(e)}
            
@@ -356,7 +357,8 @@ class WhatsAppService:
                 res = await self.process_human_chat(
                     conversation_id=conversation.id,
                     customer_id=customer.id,
-                    contents=content_items
+                    contents=content_items,
+                    is_admin=is_admin
                 )
 
                 if res.get('status') == 'error':
@@ -447,7 +449,8 @@ class WhatsAppService:
                         
                         res = await self.send_message(
                             to=messages[0].from_,
-                            message=response_text
+                            message=response_text,
+                            phone_id=phone_id
                         )
 
                         res = await insert_message(
@@ -541,12 +544,12 @@ class WhatsAppService:
                 
             return media_response.content
             
-    async def send_message(self, to: str, message: str) -> Dict[str, Any]:
+    async def send_message(self, to: str, message: str, phone_id: str) -> Dict[str, Any]:
         """Send a text message to a WhatsApp number"""
         # Format phone number
         formatted_to = to.replace("+", "").strip()
         
-        url = f"{self.base_url}/{self.phone_number_id}/messages"
+        url = f"{self.base_url}/{phone_id}/messages"
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json"
@@ -598,13 +601,13 @@ class WhatsAppService:
             
             return {"status": "error", "message": str(e)}
 
-    async def process_human_chat(self, conversation_id: str, customer_id: str, contents: List[Dict[str,Any]]) -> Dict[str, Any]:
+    async def process_human_chat(self, conversation_id: str, customer_id: str, contents: List[Dict[str,Any]], is_admin: bool = False) -> Dict[str, Any]:
         try:
             await insert_message(
                 conversation_id=conversation_id,
                 contact_id=customer_id,
                 contents=contents,
-                role="user"
+                role="admin" if is_admin else "user"
             )
 
             return {"status": "success"}

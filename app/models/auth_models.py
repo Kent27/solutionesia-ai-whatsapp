@@ -31,5 +31,4 @@ class AuthUserResponse(UserBase):
         from_attributes = True
 
 class AuthResponse(BaseModel):
-    user: UserResponse
-    token: str 
+    user: UserResponse 

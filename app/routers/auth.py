@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from ..models.auth_models import UserLogin, UserRegister, UserResponse, AuthResponse, UserNameUpdate
 from ..services.auth_service import AuthService
@@ -13,9 +13,9 @@ auth_service = AuthService()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 @router.post("/login", response_model=AuthResponse)
-async def login(user_data: UserLogin) -> Dict[str, Any]:
+async def login(user_data: UserLogin, response: Response) -> Dict[str, Any]:
     """
-    Authenticate a user and return a JWT token
+    Authenticate a user and return a JWT token (in cookie)
     """
     try:
         result = await auth_service.authenticate_user(
@@ -28,8 +28,18 @@ async def login(user_data: UserLogin) -> Dict[str, Any]:
                 status_code=401,
                 detail="Incorrect email or password"
             )
+
+        # Set cookie
+        response.set_cookie(
+            key="access_token",
+            value=result["token"],
+            httponly=True,
+            # secure=True, # Should be true in prod suitable for localhost testing to be auto/loose or conditional
+            samesite="lax",
+            max_age=60 * 60 * 24 # 24 hours
+        )
             
-        return result
+        return {"user": result["user"]}
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         raise HTTPException(
@@ -38,7 +48,7 @@ async def login(user_data: UserLogin) -> Dict[str, Any]:
         )
 
 @router.post("/register", response_model=AuthResponse)
-async def register(user_data: UserRegister) -> Dict[str, Any]:
+async def register(user_data: UserRegister, response: Response) -> Dict[str, Any]:
     """
     Register a new user
     """
@@ -83,8 +93,17 @@ async def register(user_data: UserRegister) -> Dict[str, Any]:
                 detail="Failed to authenticate new user"
             )
             
+        # Set cookie
+        response.set_cookie(
+            key="access_token",
+            value=auth_result["token"],
+            httponly=True,
+            samesite="lax",
+            max_age=60 * 60 * 24
+        )
+
         logger.info(f"User registration completed successfully: {user_data.email}")
-        return auth_result
+        return {"user": auth_result["user"]}
     except HTTPException as he:
         logger.warning(f"HTTP exception during registration: {str(he)}")
         raise

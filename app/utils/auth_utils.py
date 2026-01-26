@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from typing import Dict, Any
 import jwt as pyjwt
@@ -11,9 +11,22 @@ logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any]:
-    """Get the current authenticated user from the token"""
+async def get_current_user(request: Request) -> Dict[str, Any]:
+    """Get the current authenticated user from the token (cookie or header)"""
     try:
+        # Try to get token from cookie
+        token = request.cookies.get("access_token")
+        logger.info(token)
+        
+        # Fallback to Authorization header
+        # if not token:
+        #     auth_header = request.headers.get("Authorization")
+        #     if auth_header and auth_header.startswith("Bearer "):
+        #         token = auth_header.split(" ")[1]
+
+        if not token:
+             raise HTTPException(status_code=401, detail="Not authenticated")
+
         # Decode the JWT token
         payload = pyjwt.decode(
             token, 

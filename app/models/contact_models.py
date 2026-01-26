@@ -6,9 +6,9 @@ import re
 class ContactBase(BaseModel):
     name: str = Field(..., min_length=1)
     phoneNumber: str = Field(..., min_length=8)
-    email: str | None = Field(None)
-    stamps: str | None = Field(None)
-    organizationId: str | None = Field(None)
+    email: Optional[str] | None = Field(None)
+    stamps: Optional[str] | None = Field(None)
+    organizationId: Optional[str] | None = Field(None)
     
     @validator('phoneNumber')
     def validate_phone_number(cls, v):

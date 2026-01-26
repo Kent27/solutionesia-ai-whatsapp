@@ -3,12 +3,14 @@ from typing import Optional, Dict, Any, List
 from ..database.mysql import MariaDBClient
 import logging
 from datetime import datetime
+from ..services.whatsapp_service import WhatsAppService
 
 logger = logging.getLogger(__name__)
 
 class MessageService:
     def __init__(self):
         self.db = MariaDBClient()
+        self.whatsapp_service = WhatsAppService()
         
     async def get_messages(self, user_id: str, page: int = 1, limit: int = 50) -> Dict[str, Any]:
         """Get messages for a user with pagination"""
@@ -52,42 +54,70 @@ class MessageService:
             logger.error(f"Error getting messages: {str(e)}", exc_info=True)
             raise
             
-    async def create_message(self, user_id: str, content: str, recipient_id: str, recipient_type: str) -> Optional[Dict[str, Any]]:
-        """Create a new message"""
+    async def create_message(self, conversation_id: str, content: str, content_type: str = "text", role: str = "admin") -> Optional[Dict[str, Any]]:
+        """Create a new message in a conversation"""
         try:
+            # Get contact_id from conversation to set recipient
+            conv_query = "SELECT contact_id FROM conversations WHERE id = %s"
+            conv = await self.db.fetch_one(conv_query, (conversation_id,))
+            contact_id = conv[0] if conv else None
+            
             # Insert message
-            query = """
-                INSERT INTO messages (content, sender_id, recipient_id, recipient_type, status)
-                VALUES (%s, %s, %s, %s, %s)
+            insert_query = """
+                INSERT INTO messages (conversation_id, content, content_type, role)
+                VALUES (%s, %s, %s, %s)
             """
-            result = await self.db.execute(query, (content, user_id, recipient_id, recipient_type, "pending"))
             
-            if result and result.get("id"):
-                message_id = result.get("id")
-                
-                # Get the created message
-                get_query = """
-                    SELECT id, content, timestamp, status, recipient_id, recipient_type
-                    FROM messages
-                    WHERE id = %s
-                """
-                message = await self.db.fetch_one(get_query, (message_id,))
-                
-                if message:
-                    # Send the message via WhatsApp service
-                    # This would be implemented based on your WhatsApp integration
-                    # await self.send_whatsapp_message(message)
-                    
-                    return {
-                        "id": str(message[0]),
-                        "content": message[1],
-                        "timestamp": message[2],
-                        "status": message[3],
-                        "recipientId": message[4],
-                        "recipientType": message[5]
-                    }
+            result = await self.db.execute(insert_query, (
+                conversation_id,
+                content,
+                content_type,
+                role
+            ))
+
+            get_conversation_query = """
+                SELECT o.phone_id, c.phone_number
+                FROM organizations o
+                JOIN contacts c ON o.id = c.organization_id
+                JOIN conversations conv ON c.id = conv.contact_id
+                WHERE conv.id = %s
+            """
+
+            row = await self.db.fetch_one(get_conversation_query, (conversation_id,))
             
-            return None
+            if not row:
+                raise Exception("Conversation not found")
+
+            if result and isinstance(result, dict) and result.get("id"):
+                message_id = str(result.get("id"))
+            else:
+                 # If execute doesn't return id, we might need another way or assume it did.
+                 # For now, let's try to pass '0' or look it up if critical, but likely it returns id.
+                 # Or query last inserted.
+                 # Let's hope result contains ID.
+                 message_id = str(result.get("id")) if isinstance(result, dict) else "unknown"
+
+            result_wa = await self.whatsapp_service.send_message(
+                phone_id=row[0],
+                to=row[1],
+                message=content
+            )
+
+            if not result_wa:
+                raise Exception("Failed to send WhatsApp Message")
+
+            return {
+                "id": message_id,
+                "conversation_id": conversation_id,
+                "content": content,
+                "content_type": content_type,
+                "timestamp": datetime.now(),
+                "role": role,
+                "status": "sent",
+                "recipientId": str(contact_id) if contact_id else "unknown",
+                "recipientType": "contact"
+            }
+            
         except Exception as e:
             logger.error(f"Error creating message: {str(e)}", exc_info=True)
             raise

@@ -7,14 +7,21 @@ from typing import List
 from ..models.organization_models import (
     OrganizationCreate, OrganizationResponse, OrganizationLogin, 
     Token, OrganizationUpdateStatus, OrganizationUpdateProfile,
-    OrganizationUserInvite, OrganizationUserUpdate, OrganizationUserResponse
+    Token, OrganizationUpdateStatus, OrganizationUpdateProfile,
+    OrganizationUserInvite, OrganizationUserUpdate, OrganizationUserResponse,
+    OrganizationUserInvite, OrganizationUserUpdate, OrganizationUserResponse,
+    OrganizationContactsListResponse, OrganizationsListResponse, ContactsListResponse,
+    ConversationFilter
 )
+from ..models.conversation_models import ConversationsListResponse
 from ..services.organization_service import OrganizationService
 from ..utils.auth_utils import get_current_admin_user, get_current_user
 from typing import Dict, Any
 import logging
 import jwt as pyjwt
 import os
+from fastapi import Query
+from fastapi import Query
 
 router = APIRouter(prefix="/api/organizations", tags=["Organization"])
 logger = logging.getLogger(__name__)
@@ -23,6 +30,22 @@ org_service = OrganizationService()
 auth_service = AuthService()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="organization/login")
+
+@router.get("", response_model=OrganizationsListResponse)
+async def list_organizations(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """
+    List all organizations.
+    Allowed for: App Admin.
+    """
+    try:
+        return await org_service.get_all_organizations(page, limit)
+    except Exception as e:
+        logger.error(f"Error listing organizations: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/register", response_model=Dict[str, Any])
 async def register_organization(
@@ -102,6 +125,124 @@ async def get_organization_users(
         raise
     except Exception as e:
         logger.error(f"Error getting org users: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+    except Exception as e:
+        logger.error(f"Error getting org users: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/{org_id}/contacts", response_model=ContactsListResponse)
+async def get_organization_contacts(
+    org_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get organization contacts.
+    Allowed for: App Admin or Member of the organization.
+    """
+    try:
+        user_id = current_user["id"]
+        
+        # Check permissions
+        is_member = await org_service.check_is_org_member(org_id, user_id)
+        is_admin = await CheckIsAppAdmin(user_id)
+        
+        if not (is_member or is_admin):
+            raise HTTPException(status_code=403, detail="Not authorized to view organization contacts")
+
+        return await org_service.get_organization_contacts(org_id, page, limit)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting org contacts: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/{org_id}/contacts/{contact_id}/conversations", response_model=ConversationsListResponse)
+async def get_contact_conversations(
+    org_id: str,
+    contact_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get conversations for a specific contact.
+    Allowed for: App Admin or Member of the organization.
+    """
+    try:
+        user_id = current_user["id"]
+        
+        # Check permissions
+        is_member = await org_service.check_is_org_member(org_id, user_id)
+        is_admin = await CheckIsAppAdmin(user_id)
+        
+        if not (is_member or is_admin):
+            raise HTTPException(status_code=403, detail="Not authorized to view contact conversations")
+
+        conversations = await org_service.get_contact_conversations(org_id, contact_id, page, limit)
+        if conversations is None:
+             raise HTTPException(status_code=404, detail="Contact not found in organization")
+             
+        return conversations
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting contact conversations: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/{org_id}/conversations/human", response_model=ConversationsListResponse)
+async def get_organization_human_conversations(
+    org_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get organization conversations with mode 'human'.
+    Allowed for: App Admin or Member.
+    """
+    try:
+        user_id = current_user["id"]
+        
+        # Check permissions
+        is_member = await org_service.check_is_org_member(org_id, user_id)
+        is_admin = await CheckIsAppAdmin(user_id)
+        
+        if not (is_member or is_admin):
+            raise HTTPException(status_code=403, detail="Not authorized to view organization conversations")
+
+        return await org_service.get_organization_human_conversations(org_id, page, limit)
+    except Exception as e:
+        logger.error(f"Error getting human conversations: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.post("/{org_id}/conversations", response_model=ConversationsListResponse)
+async def get_organization_conversations(
+    org_id: str,
+    filter: ConversationFilter,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get organization conversations with optional filters (mode, status).
+    Allowed for: App Admin or Organization Member.
+    """
+    try:
+        user_id = current_user["id"]
+        
+        # Check permissions
+        is_member = await org_service.check_is_org_member(org_id, user_id)
+        is_admin = await CheckIsAppAdmin(user_id)
+        
+        if not (is_member or is_admin):
+            raise HTTPException(status_code=403, detail="Not authorized to view organization conversations")
+
+        return await org_service.get_organization_conversations(org_id, filter)
+    except Exception as e:
+        logger.error(f"Error searching org conversations: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/{org_id}/users/invite", response_model=OrganizationUserResponse)

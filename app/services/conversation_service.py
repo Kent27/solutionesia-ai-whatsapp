@@ -5,25 +5,61 @@ from ..database.mysql import MariaDBClient
 import logging
 from datetime import datetime
 from pydantic import BaseModel
+import json
+from .websocket_service import manager
 
 logger = logging.getLogger(__name__)
 
 class GetConversationResponse(BaseModel):
     id: str
-    metadata: Dict[str, Any] | None = None
+    name: str = "Unknown"
+    phoneNumber: Optional[str] = None
     status: str
-    mode: str = 'ai'
+    mode: str
+    contact: Optional[Dict[str, Any]] = None
+    messages: List[Dict[str, Any]] = []
+
+    class Config:
+        from_attributes = True
 
 class ConversationService:
     def __init__(self):
         self.db = MariaDBClient()
+
+    async def verify_conversation_access(self, conversation_id: str, user_id: str) -> bool:
+        """Verify if a user has access to a conversation (Org Member OR App Admin)"""
+        try:
+            # 1. Check if user is App Admin
+            admin_query = """
+                SELECT 1 
+                FROM users u
+                JOIN roles r ON u.role_id = r.id
+                WHERE u.id = %s AND r.name = 'admin'
+            """
+            is_admin = await self.db.fetch_one(admin_query, (user_id,))
+            if is_admin:
+                return True
+
+            # 2. Check if user is part of the organization that owns the contact of the conversation
+            query = """
+                SELECT 1
+                FROM conversations conv
+                JOIN contacts c ON conv.contact_id = c.id
+                JOIN organization_users ou ON c.organization_id = ou.organization_id
+                WHERE conv.id = %s AND ou.user_id = %s
+            """
+            result = await self.db.fetch_one(query, (conversation_id, user_id))
+            return True if result else False
+        except Exception as e:
+            logger.error(f"Error verification conversation access: {str(e)}", exc_info=True)
+            return False
 
     async def get_conversation(self, contact_id: str, organization_id: str) -> Optional[GetConversationResponse]:
         """Get or create conversation by contact id and status 'active' """
         try:
             # Check if contact exists for the organization
             conversation_query = """
-                SELECT conversations.id, conversations.metadata, conversations.status, conversations.mode
+                SELECT conversations.id, conversations.status, conversations.mode
                 FROM conversations 
                 LEFT JOIN contacts 
                     ON conversations.contact_id = contacts.id
@@ -34,14 +70,79 @@ class ConversationService:
             if conversation:
                 return GetConversationResponse(
                     id=conversation[0],
-                    metadata=conversation[1],
-                    status=conversation[2],
-                    mode=conversation[3] if conversation[3] else 'ai'
+                    status=conversation[1],
+                    mode=conversation[2] if conversation[2] else 'ai'
                 )
 
             return None
         except Exception as e:
             logger.error(f"Error getting conversation: {str(e)}", exc_info=True)
+            raise
+
+    async def get_conversation_details(self, conversation_id: str) -> Optional[GetConversationResponse]:
+        """Get conversation details by ID"""
+        try:
+            query = """
+                SELECT c.id, c.status, c.mode,
+                       ct.id as contact_id, ct.name, ct.phone_number
+                FROM conversations c
+                LEFT JOIN contacts ct ON c.contact_id = ct.id
+                WHERE c.id = %s
+            """
+            row = await self.db.fetch_one(query, (conversation_id,))
+            
+            if row:
+                # Prepare contact info
+                contact_name = row[4] if row[4] else "Unknown"
+                contact_phone = row[5] if row[5] else ""
+                
+                # Fix phone format
+                if contact_phone and not contact_phone.startswith('+') and contact_phone.isdigit():
+                    contact_phone = f"+{contact_phone}"
+                elif contact_phone and not contact_phone.startswith('+'):
+                    # attempt to fix clean
+                    import re # ensure imported or use simple check
+                    # assuming it might just be numbers
+                    pass 
+
+                contact_data = None
+                if row[3]: # contact_id exists
+                     contact_data = {
+                         "id": str(row[3]),
+                         "name": contact_name,
+                         "phoneNumber": contact_phone,
+                     }
+
+                # Fetch messages
+                msg_query = """
+                    SELECT content, content_type, status, role, created_at
+                    FROM messages
+                    WHERE conversation_id = %s
+                """
+                msg_rows = await self.db.fetch_all(msg_query, (conversation_id,))
+                
+                messages = []
+                for m in msg_rows:
+                    messages.append({
+                        "content": m[0] if m[0] else "",
+                        "contentType": m[1],
+                        "role": m[3] if m[3] else "unknown",
+                        "status": m[2],
+                        "timestamp": m[4]
+                    })
+
+                return GetConversationResponse(
+                    id=str(row[0]),
+                    name=contact_name,
+                    phoneNumber=contact_phone,
+                    status=row[1],
+                    mode=row[2] if row[2] else 'ai',
+                    contact=contact_data,
+                    messages=messages
+                )
+            return None
+        except Exception as e:
+            logger.error(f"Error getting conversation details: {str(e)}", exc_info=True)
             raise
     
     async def update_conversation_mode(self, id: str, mode: str) -> bool:
@@ -107,12 +208,20 @@ class ConversationService:
             conversation = await self.db.fetch_one(fetch_query, (contact_id,))
             
             if conversation:
-                return GetConversationResponse(
+                response = GetConversationResponse(
                     id=conversation[0],
                     metadata=conversation[1],
                     status=conversation[2],
                     mode=conversation[3]
                 )
+
+                # Broadcast new conversation event
+                await manager.broadcast(json.dumps({
+                    "type": "conversation_created",
+                    "data": response.model_dump()
+                }), id)
+
+                return response
             else:
                 raise Exception("Failed to create conversation")
         except Exception as e:

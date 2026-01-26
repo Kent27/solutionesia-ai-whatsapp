@@ -1,5 +1,6 @@
 from app.models.auth_models import AuthUserResponse
 from app.models.auth_models import UserResponse
+from app.models.user_models import UserListFilter
 import os
 import jwt as pyjwt
 from datetime import datetime, timedelta
@@ -50,6 +51,30 @@ class AuthService:
             return None
         except Exception as e:
             logger.error(f"Error getting user by email: {str(e)}")
+            return None
+            
+    async def get_user_with_role(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get user details with role by ID"""
+        try:
+            query = """
+                SELECT u.id, u.name, u.email, u.profile_picture, r.name as role_name 
+                FROM users u
+                LEFT JOIN roles r ON u.role_id = r.id
+                WHERE u.id = %s
+            """
+            result = await self.db.fetch_one(query, (user_id,))
+            
+            if result:
+                return {
+                    "id": str(result[0]),
+                    "name": result[1],
+                    "email": result[2],
+                    "profile_picture": result[3],
+                    "role": result[4] if result[4] else "user"
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error getting user with role: {str(e)}")
             return None
             
     async def get_auth_user_by_email(self, email: str) -> Optional[AuthUserResponse]:
@@ -156,4 +181,78 @@ class AuthService:
             return True
         except Exception as e:
             logger.error(f"Error updating user name: {str(e)}", exc_info=True)
-            return False 
+            return False
+
+    async def get_all_users(self, filter: UserListFilter) -> Dict[str, Any]:
+        """Get all users with filter"""
+        try:
+            params = []
+            conditions = []
+            
+            # Base query parts
+            base_query = """
+                FROM users u
+                LEFT JOIN roles r ON u.role_id = r.id
+            """
+            
+            if filter.role:
+                conditions.append("r.name = %s")
+                params.append(filter.role)
+            
+            if filter.search:
+                search_term = f"%{filter.search}%"
+                conditions.append("(u.name LIKE %s OR u.email LIKE %s)")
+                params.append(search_term)
+                params.append(search_term)
+            
+            where_clause = ""
+            if conditions:
+                where_clause = "WHERE " + " AND ".join(conditions)
+                
+            # Count
+            count_query = f"SELECT COUNT(*) {base_query} {where_clause}"
+            count_result = await self.db.fetch_one(count_query, tuple(params))
+            total = count_result[0] if count_result else 0
+            
+            if total == 0:
+                return {
+                    "users": [],
+                    "total": 0,
+                    "page": filter.page,
+                    "limit": filter.limit
+                }
+
+            # Fetch
+            offset = (filter.page - 1) * filter.limit
+            params.append(filter.limit)
+            params.append(offset)
+            
+            query = f"""
+                SELECT u.id, u.name, u.email, u.profile_picture, r.name as role_name
+                {base_query}
+                {where_clause}
+                ORDER BY u.created_at DESC
+                LIMIT %s OFFSET %s
+            """
+            
+            rows = await self.db.fetch_all(query, tuple(params))
+            
+            users = []
+            for r in rows:
+                users.append({
+                    "id": str(r[0]),
+                    "name": r[1],
+                    "email": r[2],
+                    "profile_picture": r[3],
+                    "role": r[4] if r[4] else "user"
+                })
+                
+            return {
+                "users": users,
+                "total": total,
+                "page": filter.page,
+                "limit": filter.limit
+            }
+        except Exception as e:
+            logger.error(f"Error getting all users: {str(e)}", exc_info=True)
+            raise 

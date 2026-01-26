@@ -3,11 +3,12 @@ import logging
 from typing import Dict, Any
 from ..services.whatsapp_service import WhatsAppService
 from datetime import datetime
+from ..services.organization_service import OrganizationService
 
 logger = logging.getLogger(__name__)
 whatsapp_service = WhatsAppService()
 
-async def alert_admin(message: str, severity: str = "info", context: Dict[str, Any] = None) -> Dict[str, Any]:
+async def alert_admin(message: str, severity: str = "info", context: Dict[str, Any] = None, organization_id: str) -> Dict[str, Any]:
     """
     Send an alert message to the admin's WhatsApp number
     
@@ -51,10 +52,13 @@ async def alert_admin(message: str, severity: str = "info", context: Dict[str, A
         else:  # info
             formatted_message = "ℹ️ " + formatted_message
         
+        organization_service = OrganizationService()
+        organization = await organization_service.get_organization_by_id(organization_id)
         # Send the message via WhatsApp
         response = await whatsapp_service.send_message(
             to=admin_phone,
-            message=formatted_message
+            message=formatted_message,
+            phone_id=organization.phone_id
         )
         
         logger.info(f"Admin alert sent to {admin_phone}: {message}")

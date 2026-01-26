@@ -1,18 +1,20 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List, Any, Dict
 from datetime import datetime
+from .contact_models import ContactResponse
 
 # Conversation Models
 class ConversationBase(BaseModel):
-    contact_id: str
+    name: str
+    phoneNumber: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = Field(default=None)
-    status: str = Field(default='active')
-
-class ConversationCreate(ConversationBase):
-    pass
+    mode: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
 
 class ConversationResponse(ConversationBase):
     id: str
+    lastMessage: Optional[str] = None
+    timestamp: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -22,6 +24,17 @@ class ConversationsListResponse(BaseModel):
     total: int
     page: int
     limit: int
+
+class ConversationMessageResponse(BaseModel):
+    content: str
+    contentType: Optional[str] = None
+    role: str
+    status: Optional[str] = None
+    timestamp: datetime
+
+class ConversationDetailResponse(ConversationResponse):
+    contact: Optional[ContactResponse] = None
+    messages: List[ConversationMessageResponse] = []
 
 class ConversationModeUpdate(BaseModel):
     mode: str = Field(..., pattern="^(human|ai)$", description="Mode of the conversation: 'human' or 'ai'")

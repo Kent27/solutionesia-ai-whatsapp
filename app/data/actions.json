@@ -236,6 +236,12 @@
                     "type": "object",
                     "description": "Informasi tambahan untuk disertakan dalam peringatan",
                     "required": false
+                },
+                {
+                    "name": "organization_id",
+                    "type": "string",
+                    "description": "ID organisasi",
+                    "required": true
                 }
             ],
             "response": {
