@@ -9,6 +9,39 @@ CREATE TABLE IF NOT EXISTS organizations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS organization_roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    organization_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+);
+ALTER TABLE organization_users 
+ADD COLUMN organization_role_id BIGINT DEFAULT NULL,
+ADD CONSTRAINT fk_organization_role 
+    FOREIGN KEY (organization_role_id) 
+    REFERENCES organization_roles(id) 
+    ON DELETE SET NULL;
+
+CREATE TABLE IF NOT EXISTS organization_permissions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS organization_role_permissions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    organization_role_id BIGINT NOT NULL,
+    organization_permission_id BIGINT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (organization_role_id) REFERENCES organization_roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_permission_id) REFERENCES organization_permissions(id) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS roles (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,

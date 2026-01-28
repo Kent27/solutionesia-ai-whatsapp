@@ -55,7 +55,8 @@ async def create_message(
             conversation_id=conversation_id,
             content=message_data.content,
             content_type=message_data.content_type if message_data.content_type else "text",
-            role=message_data.role
+            role=message_data.role,
+            user_id=user_id
         )
         
         if not result:

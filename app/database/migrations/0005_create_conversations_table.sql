@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS messages (
     status VARCHAR(50) DEFAULT NULL,
     role VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    remark VARCHAR(100) NULL,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
     INDEX idx_conv_messages (conversation_id, created_at)
 );

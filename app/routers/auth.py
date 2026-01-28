@@ -145,4 +145,24 @@ async def update_username(
         raise HTTPException(
             status_code=500,
             detail=f"Error updating username: {str(e)}"
+        )
+
+@router.post("/logout")
+async def logout(response: Response) -> Dict[str, str]:
+    """
+    Logout the user by clearing the access token cookie
+    """
+    try:
+        response.delete_cookie(
+            key="access_token",
+            httponly=True,
+            samesite="lax"
+        )
+        return {"message": "Logged out successfully"}
+    except Exception as e:
+        logger.error(f"Logout error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Error during logout"
         ) 
+

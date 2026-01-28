@@ -24,11 +24,8 @@ class MessageCreate(MessageBase):
     pass
 
 class MessageResponse(MessageBase):
-    id: str
     timestamp: datetime
     status: MessageStatus
-    recipientId: str
-    recipientType: RecipientType
     
     class Config:
         from_attributes = True

@@ -28,7 +28,6 @@ class ContactCreate(ContactBase):
 
 class ContactResponse(ContactBase):
     id: str
-    profilePicture: Optional[str] = None
     labels: List[str] = Field(default_factory=list)
     
     class Config:

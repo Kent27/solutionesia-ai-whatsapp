@@ -16,7 +16,6 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
     try:
         # Try to get token from cookie
         token = request.cookies.get("access_token")
-        logger.info(token)
         
         # Fallback to Authorization header
         # if not token:

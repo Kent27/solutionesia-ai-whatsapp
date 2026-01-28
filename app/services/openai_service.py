@@ -228,12 +228,14 @@ class OpenAIAssistantService:
         try:
             # Create or use existing thread
             thread_id = request.thread_id
+
+            # Resolve pending thread runs if any
+            if thread_id:
+                await self.resolve_thread_runs(thread_id)
+
             if not thread_id:
                 thread = await self._run_sync(self.client.beta.threads.create)
                 thread_id = thread.id
-                
-            # Resolve pending thread runs if any
-            await self.resolve_thread_runs(thread_id)
 
             # Parse the content if it's a JSON string
             message_content = request.messages[-1].content

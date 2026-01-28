@@ -1,4 +1,3 @@
-# from app.services.memory_service import MemoryService
 import os
 from typing import Optional, Dict, Any, List
 from ..database.mysql import MariaDBClient
@@ -9,6 +8,7 @@ import json
 from .websocket_service import manager
 
 logger = logging.getLogger(__name__)
+
 
 class GetConversationResponse(BaseModel):
     id: str
@@ -22,11 +22,14 @@ class GetConversationResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class ConversationService:
     def __init__(self):
         self.db = MariaDBClient()
 
-    async def verify_conversation_access(self, conversation_id: str, user_id: str) -> bool:
+    async def verify_conversation_access(
+        self, conversation_id: str, user_id: str
+    ) -> bool:
         """Verify if a user has access to a conversation (Org Member OR App Admin)"""
         try:
             # 1. Check if user is App Admin
@@ -51,11 +54,15 @@ class ConversationService:
             result = await self.db.fetch_one(query, (conversation_id, user_id))
             return True if result else False
         except Exception as e:
-            logger.error(f"Error verification conversation access: {str(e)}", exc_info=True)
+            logger.error(
+                f"Error verification conversation access: {str(e)}", exc_info=True
+            )
             return False
 
-    async def get_conversation(self, contact_id: str, organization_id: str) -> Optional[GetConversationResponse]:
-        """Get or create conversation by contact id and status 'active' """
+    async def get_conversation(
+        self, contact_id: str, organization_id: str
+    ) -> Optional[GetConversationResponse]:
+        """Get or create conversation by contact id and status 'active'"""
         try:
             # Check if contact exists for the organization
             conversation_query = """
@@ -65,13 +72,15 @@ class ConversationService:
                     ON conversations.contact_id = contacts.id
                 WHERE conversations.contact_id = %s AND conversations.status = 'active' AND contacts.organization_id = %s
             """
-            conversation = await self.db.fetch_one(conversation_query, (contact_id, organization_id))
-            
+            conversation = await self.db.fetch_one(
+                conversation_query, (contact_id, organization_id)
+            )
+
             if conversation:
                 return GetConversationResponse(
                     id=conversation[0],
                     status=conversation[1],
-                    mode=conversation[2] if conversation[2] else 'ai'
+                    mode=conversation[2] if conversation[2] else "ai",
                 )
 
             return None
@@ -79,7 +88,9 @@ class ConversationService:
             logger.error(f"Error getting conversation: {str(e)}", exc_info=True)
             raise
 
-    async def get_conversation_details(self, conversation_id: str) -> Optional[GetConversationResponse]:
+    async def get_conversation_details(
+        self, conversation_id: str
+    ) -> Optional[GetConversationResponse]:
         """Get conversation details by ID"""
         try:
             query = """
@@ -90,28 +101,33 @@ class ConversationService:
                 WHERE c.id = %s
             """
             row = await self.db.fetch_one(query, (conversation_id,))
-            
+
             if row:
                 # Prepare contact info
                 contact_name = row[4] if row[4] else "Unknown"
                 contact_phone = row[5] if row[5] else ""
-                
+
                 # Fix phone format
-                if contact_phone and not contact_phone.startswith('+') and contact_phone.isdigit():
+                if (
+                    contact_phone
+                    and not contact_phone.startswith("+")
+                    and contact_phone.isdigit()
+                ):
                     contact_phone = f"+{contact_phone}"
-                elif contact_phone and not contact_phone.startswith('+'):
+                elif contact_phone and not contact_phone.startswith("+"):
                     # attempt to fix clean
-                    import re # ensure imported or use simple check
+                    import re  # ensure imported or use simple check
+
                     # assuming it might just be numbers
-                    pass 
+                    pass
 
                 contact_data = None
-                if row[3]: # contact_id exists
-                     contact_data = {
-                         "id": str(row[3]),
-                         "name": contact_name,
-                         "phoneNumber": contact_phone,
-                     }
+                if row[3]:  # contact_id exists
+                    contact_data = {
+                        "id": str(row[3]),
+                        "name": contact_name,
+                        "phoneNumber": contact_phone,
+                    }
 
                 # Fetch messages
                 msg_query = """
@@ -120,33 +136,35 @@ class ConversationService:
                     WHERE conversation_id = %s
                 """
                 msg_rows = await self.db.fetch_all(msg_query, (conversation_id,))
-                
+
                 messages = []
                 for m in msg_rows:
-                    messages.append({
-                        "content": m[0] if m[0] else "",
-                        "contentType": m[1],
-                        "role": m[3] if m[3] else "unknown",
-                        "status": m[2],
-                        "timestamp": m[4]
-                    })
+                    messages.append(
+                        {
+                            "content": m[0] if m[0] else "",
+                            "contentType": m[1],
+                            "role": m[3] if m[3] else "unknown",
+                            "status": m[2],
+                            "timestamp": m[4],
+                        }
+                    )
 
                 return GetConversationResponse(
                     id=str(row[0]),
                     name=contact_name,
                     phoneNumber=contact_phone,
                     status=row[1],
-                    mode=row[2] if row[2] else 'ai',
+                    mode=row[2] if row[2] else "ai",
                     contact=contact_data,
-                    messages=messages
+                    messages=messages,
                 )
             return None
         except Exception as e:
             logger.error(f"Error getting conversation details: {str(e)}", exc_info=True)
             raise
-    
+
     async def update_conversation_mode(self, id: str, mode: str) -> bool:
-        """Update conversation mode to 'ai' or 'human' """
+        """Update conversation mode to 'ai' or 'human'"""
         try:
             update_query = """
                 UPDATE conversations 
@@ -154,16 +172,67 @@ class ConversationService:
                 WHERE id = %s
             """
             await self.db.execute(update_query, (mode, id))
+            logger.info(f"Conversation mode updated to {mode} for conversation {id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
+            raise Exception("Failed to update conversation mode")
+
+    async def update_conversation_mode_by_contact(
+        self, phone_number: str, organization_id: str, mode: str
+    ) -> bool:
+        """Update conversation mode to 'ai' or 'human'"""
+        try:
+            get_conversation_query = """
+                SELECT conversations.id 
+                FROM conversations 
+                JOIN contacts ON conversations.contact_id = contacts.id
+                JOIN organizations ON contacts.organization_id = organizations.id
+                WHERE contacts.phone_number = %s 
+                AND organizations.id = %s
+                AND conversations.status = 'active'
+            """
+
+            conversation = await self.db.fetch_one(
+                get_conversation_query, (phone_number, organization_id)
+            )
+
+            if not conversation:
+                raise Exception("Conversation not found")
+
+            conversation_id = conversation[0]
+
+            update_query = """
+                UPDATE conversations 
+                SET mode = %s 
+                WHERE id = %s
+            """
+            await self.db.execute(update_query, (mode, conversation_id))
+
+            # Notify active clients via websocket
+            message = json.dumps(
+                {
+                    "broadcast_type": "conversation_mode_update",
+                    "mode": mode,
+                    "timestamp": str(datetime.now()),
+                }
+            )
+            await manager.broadcast(message, conversation_id)
+
+            logger.info(
+                f"Conversation mode updated to {mode} for conversation {conversation_id}"
+            )
+
             return True
         except Exception as e:
             logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
             raise Exception("Failed to update conversation mode")
 
     async def update_conversation_status(self, id: str, status: str) -> bool:
-        """Update conversation mode to 'ai' or 'human' """
+        """Update conversation mode to 'ai' or 'human'"""
         try:
             # Ensure single 'active' conversation
-            if status == 'active':
+            if status == "active":
                 query = """
                     SELECT id 
                     FROM conversations 
@@ -174,13 +243,13 @@ class ConversationService:
 
                 if result:
                     raise Exception("Another conversation is 'active'")
-            
+
             update_query = """
                 UPDATE conversations 
                 SET status = %s 
                 WHERE id = %s
             """
-            
+
             await self.db.execute(update_query, (status, id))
 
             return True
@@ -188,8 +257,9 @@ class ConversationService:
             logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
             raise Exception("Failed to update conversation status")
 
-    
-    async def insert_conversation(self, id: str, contact_id: str, mode: str) -> GetConversationResponse:
+    async def insert_conversation(
+        self, id: str, contact_id: str, mode: str
+    ) -> GetConversationResponse:
         """Create a new conversation"""
         try:
             insert_query = """
@@ -197,7 +267,7 @@ class ConversationService:
                 VALUES (%s, %s, 'active', %s)
             """
             await self.db.execute(insert_query, (id, contact_id, mode))
-            
+
             fetch_query = """
                 SELECT id, metadata, status, mode
                 FROM conversations 
@@ -206,20 +276,22 @@ class ConversationService:
                 LIMIT 1
             """
             conversation = await self.db.fetch_one(fetch_query, (contact_id,))
-            
+
             if conversation:
                 response = GetConversationResponse(
                     id=conversation[0],
                     metadata=conversation[1],
                     status=conversation[2],
-                    mode=conversation[3]
+                    mode=conversation[3],
                 )
 
                 # Broadcast new conversation event
-                await manager.broadcast(json.dumps({
-                    "type": "conversation_created",
-                    "data": response.model_dump()
-                }), id)
+                await manager.broadcast(
+                    json.dumps(
+                        {"type": "conversation_created", "data": response.model_dump()}
+                    ),
+                    id,
+                )
 
                 return response
             else:
@@ -227,54 +299,62 @@ class ConversationService:
         except Exception as e:
             logger.error(f"Error creating conversation: {str(e)}", exc_info=True)
             raise
-    
-    async def insert_message(self, contact_id: str, conversation_id: str, contents: List[Dict[str, Any]], role: str):
+
+    async def insert_message(
+        self,
+        conversation_id: str,
+        contents: List[Dict[str, Any]],
+        role: str,
+        remark: str | None = None,
+    ):
         """Insert messages into conversation"""
         try:
-            # memory_service = MemoryService(contact_id)
+            if remark:
+                insert_query = """
+                    INSERT INTO messages (conversation_id, content, content_type, role, remark)
+                    VALUES (%s, %s, %s, %s, %s)
+                """
+            else:
+                insert_query = """
+                    INSERT INTO messages (conversation_id, content, content_type, role)
+                    VALUES (%s, %s, %s, %s)
+                """
 
-            insert_query = """
-                INSERT INTO messages (conversation_id, content, content_type, role)
-                VALUES (%s, %s, %s, %s)
-            """
-            
             data_to_insert = []
 
             for item in contents:
-                type = item.get('type')
+                type = item.get("type")
 
-                if type == 'text':
-                    content = item.get('text')
-                elif type == 'image':
-                    content = item.get('image')
-                elif type == 'video':
-                    content = item.get('video')
-                elif type == 'audio':
-                    content = item.get('audio')
-                elif type == 'file':
-                    content = item.get('file')
+                if type == "text":
+                    content = item.get("text")
+                elif type == "image":
+                    content = item.get("image")
+                elif type == "video":
+                    content = item.get("video")
+                elif type == "audio":
+                    content = item.get("audio")
+                elif type == "file":
+                    content = item.get("file")
                 else:
-                    content = item.get('content')
-                    
-                row = (conversation_id, content, type, role)
-                data_to_insert.append(row)
+                    content = item.get("content")
 
-                # memory_service.add_message(
-                #     role=role,
-                #     content=str(content),
-                #     conversation_id=conversation_id,
-                #     timestamp=datetime.now().isoformat()
-                # )
+                if remark:
+                    row = (conversation_id, content, type, role, remark)
+                else:
+                    row = (conversation_id, content, type, role)
+
+                data_to_insert.append(row)
 
             pool = await self.db.get_pool()
             async with pool.acquire() as conn:
                 async with conn.cursor() as cur:
                     await cur.executemany(insert_query, data_to_insert)
                     await conn.commit()
-                               
+
         except Exception as e:
             logger.error(f"Error bulk inserting messages: {str(e)}", exc_info=True)
             raise
+
 
 conversation_service = ConversationService()
 
@@ -283,4 +363,7 @@ get_conversation = conversation_service.get_conversation
 insert_message = conversation_service.insert_message
 insert_conversation = conversation_service.insert_conversation
 update_conversation_mode = conversation_service.update_conversation_mode
+update_conversation_mode_by_contact = (
+    conversation_service.update_conversation_mode_by_contact
+)
 update_conversation_status = conversation_service.update_conversation_status

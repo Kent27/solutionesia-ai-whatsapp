@@ -8,7 +8,7 @@ from ..services.organization_service import OrganizationService
 logger = logging.getLogger(__name__)
 whatsapp_service = WhatsAppService()
 
-async def alert_admin(message: str, severity: str = "info", context: Dict[str, Any] = None, organization_id: str) -> Dict[str, Any]:
+async def alert_admin(message: str, organization_id: str, context: Dict[str, Any], severity: str = "info") -> Dict[str, Any]:
     """
     Send an alert message to the admin's WhatsApp number
     
