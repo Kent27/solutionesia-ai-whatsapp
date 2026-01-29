@@ -1,3 +1,4 @@
+from app.models.auth_models import UserResponse
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 from datetime import datetime
@@ -11,6 +12,8 @@ class OrganizationBase(BaseModel):
     name: str = Field(..., min_length=1)
     email: str = Field(..., min_length=1)
     status: str = Field(..., min_length=1)
+    phone_id: str | None = Field(None, min_length=1)
+    agent_id: str | None = Field(None, min_length=1)
 
     @validator("email")
     def validate_email(cls, v):
@@ -20,8 +23,6 @@ class OrganizationBase(BaseModel):
 
 
 class OrganizationCreate(OrganizationBase):
-    phone_id: str | None = Field(None, min_length=1)
-    agent_id: str | None = Field(None, min_length=1)
     password: str | None = Field(None, min_length=8)
     phone_number: str | None = Field(None, min_length=8)
 
@@ -47,8 +48,10 @@ class OrganizationLogin(BaseModel):
 
 
 class GetOrganizationResponse(OrganizationBase):
-    id: int
+    id: str
     agent_id: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -65,6 +68,7 @@ class TokenData(BaseModel):
 
 
 class OrganizationResponse(OrganizationBase):
+    id: str
     created_at: datetime
     updated_at: datetime
 
@@ -159,6 +163,7 @@ class ConversationFilter(BaseModel):
     query: Optional[str] = None
     start_date: Optional[str] = Field(None, description="YYYY-MM-DD")
     end_date: Optional[str] = Field(None, description="YYYY-MM-DD")
+    is_opened: Optional[bool] = None
     page: int = 1
     limit: int = 10
 
@@ -170,3 +175,41 @@ class OrganizationPermissionBase(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class GetOrganizationUser(BaseModel):
+    id: str
+    name: str
+    profile_picture: Optional[str] = None
+    email: str
+
+
+class GetOrganizationRole(BaseModel):
+    id: str
+    name: str
+
+
+class GetOrganizationUsersResponse(BaseModel):
+    id: str
+    user: GetOrganizationUser
+    organization_id: str
+    phone_number: Optional[str]
+    organization_role: GetOrganizationRole
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class RegisterOrganizationResponse(BaseModel):
+    org: OrganizationResponse
+    user: Optional[UserResponse] = None
+    org_user: Optional[GetOrganizationUsersResponse] = None
+
+
+class OrganizationListFilter(BaseModel):
+    query: Optional[str] = None
+    status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+    page: int = 1
+    limit: int = 10

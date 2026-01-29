@@ -18,10 +18,10 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
         token = request.cookies.get("access_token")
         
         # Fallback to Authorization header
-        # if not token:
-        #     auth_header = request.headers.get("Authorization")
-        #     if auth_header and auth_header.startswith("Bearer "):
-        #         token = auth_header.split(" ")[1]
+        if not token:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
 
         if not token:
              raise HTTPException(status_code=401, detail="Not authenticated")
@@ -34,7 +34,7 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
         )
         user_id = payload.get("sub")
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials no user_id provided")
             
         return {"id": user_id, "email": payload.get("email")}
     except Exception as e:

@@ -1,10 +1,7 @@
 from app.models.assistant_models import AssistantUpdateRequest
 from openai import AsyncOpenAI
-# ...existing code...
 
 class AssistantService:
-    # ...existing code...
-    
     async def update_assistant(self, assistant_id: str, update_data: AssistantUpdateRequest):
         """Update an existing assistant with new configuration"""
         client = AsyncOpenAI()

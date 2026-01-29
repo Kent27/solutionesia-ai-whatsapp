@@ -1,7 +1,5 @@
-import os
 from ..database.mysql import MariaDBClient
 import logging
-from datetime import datetime
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -50,7 +48,8 @@ class CustomerService:
                     phone_number=contact[2]
                 )
                 
-            return None
+            if not contact:
+                raise ValueError("Contact not found")
 
         except Exception as e:
             logger.error(f"Error getting customer: {str(e)}", exc_info=True)

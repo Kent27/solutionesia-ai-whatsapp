@@ -11,7 +11,7 @@ class OrganizationPermissionService:
     def __init__(self):
         self.db = MariaDBClient()
 
-    async def init_org_permission(self, org_id: str) -> bool:
+    async def init_org_roles(self, org_id: str) -> bool:
         """
         Creates initial organization roles (admin, user) for a new organization.
         """

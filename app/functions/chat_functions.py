@@ -22,10 +22,6 @@ async def enable_live_chat(
         Dict: Status and message
     """
     try:
-        logger.info("[Entering enable live chat mode]")
-        logger.info(phone_number)
-        logger.info(organization_id)
-
         # # Normalize phone number format
         # std_phone_number = phone_number.strip()
 
@@ -42,19 +38,17 @@ async def enable_live_chat(
             phone_number, organization_id, "human"
         )
 
-        # # Alert admin for live chat request
-        # success = await alert_admin(
-        #     message=f"Customer asks for Live Chat",
-        #     severity="info",
-        #     context={
-        #         "phone_number": phone_number,
-        #         "action": "Live Chat",
-        #         "status": "Active",
-        #     },
-        #     organization_id=organization_id,
-        # )
-
-        logger.info(success)
+        # Alert admin for live chat request
+        success = await alert_admin(
+            message=f"Customer asks for Live Chat",
+            severity="info",
+            context={
+                "phone_number": phone_number,
+                "action": "Live Chat",
+                "status": "Active",
+            },
+            organization_id=organization_id,
+        )
 
         if success:
             logger.info(f"Live Chat mode enabled for {phone_number}")

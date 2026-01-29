@@ -29,7 +29,10 @@ async def verify_webhook(request: Request):
 @router.post("/webhook")
 async def webhook(request: WhatsAppWebhookRequest):
     """Handle incoming messages from WhatsApp"""
-    return await whatsapp_service.process_webhook(request)
+    try:
+        return await whatsapp_service.process_webhook(request)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to process webhook")
 
 @router.post("/set-chat-status")
 async def set_customer_chat_status(request: ChatStatusRequest):

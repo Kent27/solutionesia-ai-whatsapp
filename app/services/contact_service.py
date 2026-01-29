@@ -1,8 +1,6 @@
-import os
 from typing import Optional, Dict, Any, List
 from ..database.mysql import MariaDBClient
 import logging
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

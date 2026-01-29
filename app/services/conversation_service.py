@@ -1,6 +1,5 @@
 from app.services.organization_permission_service import OrganizationPermissionService
 from app.services.organization_service import OrganizationService
-import os
 from typing import Optional, Dict, Any, List
 from ..database.mysql import MariaDBClient
 import logging

@@ -4,10 +4,8 @@ from typing import Dict, Any, List, Callable
 from ..models.assistant_models import Action
 import json
 from pathlib import Path
-import os
 from fastapi import HTTPException
 import importlib
-from functools import partial
 
 class ActionService:
     _instance = None

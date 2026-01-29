@@ -31,8 +31,7 @@ class UserProfileResponse(BaseModel):
     id: str
     name: str
     email: str
-    role: str # Global role
-    role: str # Global role
+    role: str
     profile_picture: Optional[str] = None
 
 class UsersListResponse(BaseModel):

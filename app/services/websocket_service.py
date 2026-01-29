@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 class ConnectionManager:
     def __init__(self):
-        # Dictionary to store connections per conversation_id
+        # Stores connections by conversation_id
         self.active_connections: Dict[str, List[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, conversation_id: str):

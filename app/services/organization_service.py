@@ -1,3 +1,8 @@
+from app.models.organization_models import (
+    GetOrganizationUsersResponse,
+    GetOrganizationUser,
+    GetOrganizationRole,
+)
 from app.routers.auth import auth_service
 from app.models.organization_models import GetOrganizationResponse
 import logging
@@ -8,6 +13,7 @@ from ..models.organization_models import (
     OrganizationUpdateStatus,
     OrganizationUpdateProfile,
     ConversationFilter,
+    OrganizationListFilter,
 )
 
 logger = logging.getLogger(__name__)
@@ -17,13 +23,37 @@ class OrganizationService:
     def __init__(self):
         self.db = MariaDBClient()
 
-    async def get_organization_human_conversations(
-        self, org_id: str, page: int = 1, limit: int = 10
+    async def get_organization_new_conversations_counts(
+        self, org_id: str
     ) -> Dict[str, Any]:
         """Get 'human' mode conversations for an organization"""
         try:
-            offset = (page - 1) * limit
+            # Count
+            count_query = """
+                SELECT COUNT(c.id) 
+                FROM conversations c
+                JOIN contacts ct ON c.contact_id = ct.id
+                WHERE ct.organization_id = %s 
+                    AND c.mode = 'human'
+                    AND c.status = 'active'
+                    AND c.is_opened = '0'
+            """
+            count_res = await self.db.fetch_one(count_query, (org_id,))
+            total = count_res[0] if count_res else 0
 
+            return {
+                "total": total,
+            }
+        except Exception as e:
+            logger.error(
+                f"Error getting organization new conversations counts: {str(e)}",
+                exc_info=True,
+            )
+            raise
+
+    async def get_organization_new_conversations(self, org_id: str) -> Dict[str, Any]:
+        """Get 'human' mode conversations for an organization"""
+        try:
             # Count
             count_query = """
                 SELECT COUNT(c.id) 
@@ -36,16 +66,18 @@ class OrganizationService:
 
             # Fetch
             query = """
-                SELECT c.id, ct.name, ct.phone_number, c.metadata, c.status, c.mode,
+                SELECT c.id, ct.name, ct.phone_number, c.status, c.mode,
                        (SELECT content FROM messages m WHERE m.conversation_id = c.id AND m.role = 'user' ORDER BY m.created_at DESC LIMIT 1) as last_user_message,
                        (SELECT created_at FROM messages m WHERE m.conversation_id = c.id AND m.role = 'user' ORDER BY m.created_at DESC LIMIT 1) as last_user_message_at
                 FROM conversations c
                 JOIN contacts ct ON c.contact_id = ct.id
-                WHERE ct.organization_id = %s AND c.mode = 'human' and c.status = 'active'
+                WHERE ct.organization_id = %s 
+                    AND c.mode = 'human' 
+                    AND c.status = 'active' 
+                    AND c.is_opened = '0' 
                 ORDER BY c.id DESC
-                LIMIT %s OFFSET %s
             """
-            rows = await self.db.fetch_all(query, (org_id, limit, offset))
+            rows = await self.db.fetch_all(query, (org_id,))
 
             conversations = []
             for cr in rows:
@@ -54,19 +86,16 @@ class OrganizationService:
                         "id": str(cr[0]),
                         "name": str(cr[1]),
                         "phoneNumber": str(cr[2]),
-                        "metadata": cr[3],
-                        "status": cr[4],
-                        "mode": cr[5],
-                        "lastMessage": cr[6],
-                        "timestamp": cr[7],
+                        "status": cr[3],
+                        "mode": cr[4],
+                        "lastMessage": cr[5],
+                        "timestamp": cr[6],
                     }
                 )
 
             return {
                 "conversations": conversations,
                 "total": total,
-                "page": page,
-                "limit": limit,
             }
         except Exception as e:
             logger.error(
@@ -105,10 +134,12 @@ class OrganizationService:
                 conditions.append("DATE(c.created_at) <= %s")
                 params.append(filter.end_date)
 
+            if filter.is_opened:
+                conditions.append("c.is_opened = %s")
+                params.append("1" if filter.is_opened else "0")
+
             where_clause = "WHERE " + " AND ".join(conditions)
-            logger.info(f"Where: {where_clause}")
-            logger.info(f"Params: {params}")
-            # Count
+
             count_query = f"""
                 SELECT COUNT(c.id) 
                 FROM conversations c
@@ -328,22 +359,23 @@ class OrganizationService:
             )
             raise
 
-    async def get_organization_by_email(self, email: str) -> GetOrganizationResponse:
+    async def get_organization_by_email(self, email: str) -> Optional[GetOrganizationResponse]:
         """Get organization by email"""
         try:
-            query = "SELECT id, name, email, status, phone_id, created_at, updated_at FROM organizations WHERE email = %s"
+            query = "SELECT id, name, email, status, phone_id, created_at, updated_at, agent_id FROM organizations WHERE email = %s"
             result = await self.db.fetch_one(query, (email,))
 
             if result:
-                return {
-                    "id": str(result[0]),
-                    "name": result[1],
-                    "email": result[2],
-                    "status": result[3],
-                    "phone_id": result[4],
-                    "created_at": result[5],
-                    "updated_at": result[6],
-                }
+                return GetOrganizationResponse(
+                    id=str(result[0]),
+                    name=result[1],
+                    email=result[2],
+                    status=result[3],
+                    phone_id=result[4],
+                    created_at=result[5],
+                    updated_at=result[6],
+                    agent_id=result[7],
+                )
             return None
         except Exception as e:
             logger.error(f"Error getting organization by email: {str(e)}")
@@ -358,15 +390,15 @@ class OrganizationService:
             result = await self.db.fetch_one(query, (id,))
 
             if result:
-                return {
-                    "id": str(result[0]),
-                    "name": result[1],
-                    "email": result[2],
-                    "status": result[3],
-                    "phone_id": result[4],
-                    "created_at": result[5],
-                    "updated_at": result[6],
-                }
+                return GetOrganizationResponse(
+                    id=str(result[0]),
+                    name=result[1],
+                    email=result[2],
+                    status=result[3],
+                    phone_id=result[4],
+                    created_at=result[5],
+                    updated_at=result[6],
+                )
             return None
         except Exception as e:
             logger.error(f"Error getting organization by id: {str(e)}")
@@ -381,16 +413,16 @@ class OrganizationService:
             result = await self.db.fetch_one(query, (phone_id,))
 
             if result:
-                return {
-                    "id": result[0],
-                    "name": result[1],
-                    "email": result[2],
-                    "status": result[3],
-                    "agent_id": result[4],
-                }
+                return GetOrganizationResponse(
+                    id=str(result[0]),
+                    name=result[1],
+                    email=result[2],
+                    status=result[3],
+                    agent_id=result[4],
+                )
             return None
         except Exception as e:
-            logger.error(f"Error getting organization by email: {str(e)}")
+            logger.error(f"Error getting organization by phone_id: {str(e)}")
             return None
 
     async def create_organization(
@@ -423,6 +455,9 @@ class OrganizationService:
 
             # Fetch created org
             org = await self.get_organization_by_email(org_data.email)
+
+            if not org:
+                raise ValueError("Failed to create organization")
 
             return org
 
@@ -507,39 +542,41 @@ class OrganizationService:
             )
             raise
 
-    async def get_organization_users(self, org_id: str) -> List[Dict[str, Any]]:
+    async def get_organization_users(
+        self, org_id: str
+    ) -> List[GetOrganizationUsersResponse]:
         """Get all users in an organization"""
         try:
             query = """
-                SELECT ou.id, ou.user_id, ou.organization_id, ou.phone_number, ou.role_id, ou.created_at, ou.updated_at,
+                SELECT ou.id, ou.user_id, ou.organization_id, ou.phone_number, ou.created_at, ou.updated_at,
                        u.name as user_name, u.profile_picture, u.email as user_email,
-                       r.name as role_name,
                        ou.organization_role_id,
                        or_roles.name as organization_role_name
                 FROM organization_users ou
                 JOIN users u ON ou.user_id = u.id
-                JOIN roles r ON ou.role_id = r.id
                 LEFT JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
                 WHERE ou.organization_id = %s
             """
             rows = await self.db.fetch_all(query, (org_id,))
 
             return [
-                {
-                    "id": str(r[0]),
-                    "user": {
-                        "id": str(r[1]),
-                        "name": r[7],
-                        "profile_picture": r[8],
-                        "email": r[9],
-                    },
-                    "organization_id": str(r[2]),
-                    "phone_number": r[3],
-                    "role": {"id": str(r[4]), "name": r[10]},
-                    "organization_role": {"id": str(r[11]), "name": r[12]} if r[12] else None,
-                    "created_at": r[5],
-                    "updated_at": r[6],
-                }
+                GetOrganizationUsersResponse(
+                    id=str(r[0]),
+                    user=GetOrganizationUser(
+                        id=str(r[1]),
+                        name=r[6],
+                        profile_picture=r[7],
+                        email=r[8],
+                    ),
+                    organization_id=str(r[2]),
+                    phone_number=r[3],
+                    organization_role=GetOrganizationRole(
+                        id=str(r[9]),
+                        name=r[10],
+                    ),
+                    created_at=r[4],
+                    updated_at=r[5],
+                )
                 for r in rows
             ]
         except Exception as e:
@@ -561,9 +598,28 @@ class OrganizationService:
             logger.error(f"Error getting organization users: {str(e)}", exc_info=True)
             raise
 
+    async def get_organization_phones_with_takeover_permission(self, org_id: str) -> List[str]:
+        """Get all phones in an organization with takeover permission"""
+        try:
+            query = """
+                SELECT ou.phone_number
+                FROM organization_users ou
+                JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
+                JOIN organization_role_permissions orp ON or_roles.id = orp.organization_role_id
+                JOIN organization_permissions op ON orp.organization_permission_id = op.id
+                WHERE ou.organization_id = %s
+                    AND op.name = 'takeover'
+            """
+            rows = await self.db.fetch_all(query, (org_id,))
+
+            return [r[0] for r in rows]
+        except Exception as e:
+            logger.error(f"Error getting organization users: {str(e)}", exc_info=True)
+            raise
+
     async def invite_user(
         self, org_id: str, email: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> GetOrganizationUsersResponse:
         """Invite existing user to organization"""
         try:
             # Check if user exists
@@ -588,7 +644,7 @@ class OrganizationService:
             org_role_query = "SELECT id FROM organization_roles WHERE organization_id = %s AND name = 'user'"
             org_role_res = await self.db.fetch_one(org_role_query, (org_id,))
             if not org_role_res:
-                # Should have been created by init_org_permission
+                # Should have been created by init_org_roles
                 raise ValueError("Organization 'user' role not found")
             org_role_id = org_role_res[0]
 
@@ -597,12 +653,15 @@ class OrganizationService:
                 INSERT INTO organization_users (user_id, organization_id, role_id, organization_role_id)
                 VALUES (%s, %s, %s, %s)
             """
-            await self.db.execute(
-                query, (user_id, org_id, global_role_id, org_role_id)
-            )
+            await self.db.execute(query, (user_id, org_id, global_role_id, org_role_id))
 
             # Return added user info
-            return await self.get_organization_user(org_id, str(user_id))
+            org = await self.get_organization_user(org_id, str(user_id))
+
+            if not org:
+                raise ValueError("Failed to invite user")
+
+            return org
 
         except ValueError as e:
             raise e
@@ -612,41 +671,40 @@ class OrganizationService:
 
     async def get_organization_user(
         self, org_id: str, user_id: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[GetOrganizationUsersResponse]:
         """Get single organization user"""
         try:
             query = """
-                SELECT ou.id, ou.user_id, ou.organization_id, ou.role_id, ou.created_at, ou.updated_at,
+                SELECT ou.id, ou.user_id, ou.organization_id, ou.phone_number, ou.created_at, ou.updated_at,
                        u.name as user_name, u.email as user_email,
-                       r.name as role_name,
                        or_roles.name as org_role_name, or_roles.id as org_role_id
                 FROM organization_users ou
                 JOIN users u ON ou.user_id = u.id
-                JOIN roles r ON ou.role_id = r.id
                 LEFT JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
                 WHERE ou.organization_id = %s AND ou.user_id = %s
             """
             r = await self.db.fetch_one(query, (org_id, user_id))
             if r:
-                return {
-                    "id": str(r[0]),
-                    "user": {"id": str(r[1]), "name": r[6], "email": r[7]},
-                    "organization_id": str(r[2]),
-                    "role": {"id": str(r[3]), "name": r[8]},  # Global role
-                    "organization_role": {"id": str(r[10]), "name": r[9]}
-                    if r[10]
-                    else None,
-                    "created_at": r[4],
-                    "updated_at": r[5],
-                }
-            return None
+                return GetOrganizationUsersResponse(
+                    id=str(r[0]),
+                    user={"id": str(r[1]), "name": r[6], "email": r[7]},
+                    organization_id=str(r[2]),
+                    phone_number=r[3] if r[3] else None,
+                    organization_role={
+                        "id": str(r[9]),
+                        "name": r[8],
+                    },
+                    created_at=r[4],
+                    updated_at=r[5],
+                )
+            raise ValueError("Organization user not found")
         except Exception as e:
             logger.error(f"Error getting org user: {str(e)}", exc_info=True)
             raise
 
     async def update_user_role(
         self, org_id: str, user_id: str, organization_role_id: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[GetOrganizationUsersResponse]:
         """Update user organization role"""
         try:
             # Verify role exists in organization
@@ -663,7 +721,7 @@ class OrganizationService:
 
     async def update_user_phone_number(
         self, org_id: str, user_id: str, phone_number: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[GetOrganizationUsersResponse]:
         """Update user phone number in organization"""
         try:
             query = "UPDATE organization_users SET phone_number = %s WHERE organization_id = %s AND user_id = %s"
@@ -785,25 +843,52 @@ class OrganizationService:
             return False
 
     async def get_all_organizations(
-        self, page: int = 1, limit: int = 10
+        self, filter: OrganizationListFilter
     ) -> Dict[str, Any]:
         """Get all organizations (Admin)"""
         try:
-            offset = (page - 1) * limit
+            params = []
+            conditions = []
 
-            count_query = "SELECT COUNT(*) FROM organizations"
-            count_result = await self.db.fetch_one(count_query)
+            if filter.query:
+                conditions.append("(name LIKE %s OR email LIKE %s)")
+                params.append(f"%{filter.query}%")
+                params.append(f"%{filter.query}%")
+
+            if filter.status:
+                conditions.append("status = %s")
+                params.append(filter.status)
+
+            where_clause = ""
+            if conditions:
+                where_clause = "WHERE " + " AND ".join(conditions)
+
+            # Count
+            count_query = f"SELECT COUNT(*) FROM organizations {where_clause}"
+            count_result = await self.db.fetch_one(count_query, tuple(params))
             total = count_result[0] if count_result else 0
 
             if total == 0:
-                return {"organizations": [], "total": 0, "page": page, "limit": limit}
+                return {
+                    "organizations": [],
+                    "total": 0,
+                    "page": filter.page,
+                    "limit": filter.limit,
+                }
 
-            query = """
+            # Fetch
+            offset = (filter.page - 1) * filter.limit
+            params.append(filter.limit)
+            params.append(offset)
+
+            query = f"""
                 SELECT id, name, email, status, phone_id, agent_id, created_at, updated_at 
                 FROM organizations
+                {where_clause}
+                ORDER BY created_at DESC
                 LIMIT %s OFFSET %s
             """
-            rows = await self.db.fetch_all(query, (limit, offset))
+            rows = await self.db.fetch_all(query, tuple(params))
 
             orgs = []
             for r in rows:
@@ -820,9 +905,14 @@ class OrganizationService:
                     }
                 )
 
-            return {"organizations": orgs, "total": total, "page": page, "limit": limit}
+            return {
+                "organizations": orgs,
+                "total": total,
+                "page": filter.page,
+                "limit": filter.limit,
+            }
         except Exception as e:
-            raise
+            raise ValueError(f"Error getting organizations: {str(e)}")
 
     async def get_user_organizations(self, user_id: str) -> List[Dict[str, Any]]:
         """Get all organizations a user belongs to"""
@@ -856,17 +946,6 @@ class OrganizationService:
             logger.error(f"Error getting user organizations: {str(e)}", exc_info=True)
             raise
 
-    async def check_is_app_admin(self, user_id: str) -> bool:
-        try:
-            query = "SELECT r.name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = %s"
-            res = await self.db.fetch_one(query, (user_id,))
-            if res and res[0] == "admin":
-                return True
-            return False
-        except Exception as e:
-            logger.error(f"Error checking if app admin: {str(e)}", exc_info=True)
-            raise
-        
     async def get_organization_id_by_conversation_id(self, conversation_id: str) -> str:
         query = """
                 SELECT o.id
