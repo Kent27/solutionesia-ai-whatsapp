@@ -92,8 +92,22 @@ class OrganizationService:
                 conditions.append("c.status = %s")
                 params.append(filter.status)
 
-            where_clause = "WHERE " + " AND ".join(conditions)
+            if filter.query:
+                # Filter by contact name
+                conditions.append("ct.name LIKE %s")
+                params.append(f"%{filter.query}%")
 
+            if filter.start_date:
+                conditions.append("DATE(c.created_at) >= %s")
+                params.append(filter.start_date)
+
+            if filter.end_date:
+                conditions.append("DATE(c.created_at) <= %s")
+                params.append(filter.end_date)
+
+            where_clause = "WHERE " + " AND ".join(conditions)
+            logger.info(f"Where: {where_clause}")
+            logger.info(f"Params: {params}")
             # Count
             count_query = f"""
                 SELECT COUNT(c.id) 
@@ -232,9 +246,17 @@ class OrganizationService:
             raise
 
     async def get_contact_conversations(
-        self, org_id: str, contact_id: str, page: int = 1, limit: int = 10
+        self,
+        org_id: str,
+        contact_id: str,
+        page: int = 1,
+        limit: int = 10,
+        mode: Optional[str] = None,
+        status: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Get conversations for a specific contact in an organization"""
+        """Get conversations for a specific contact with optional filters"""
         try:
             # Verify contact belongs to org
             check_query = (
@@ -245,18 +267,42 @@ class OrganizationService:
 
             offset = (page - 1) * limit
 
-            count_query = "SELECT COUNT(*) FROM conversations WHERE contact_id = %s"
-            count_res = await self.db.fetch_one(count_query, (contact_id,))
+            params = [contact_id]
+            conditions = ["contact_id = %s"]
+
+            if mode:
+                conditions.append("mode = %s")
+                params.append(mode)
+
+            if status:
+                conditions.append("status = %s")
+                params.append(status)
+
+            if start_date:
+                conditions.append("DATE(created_at) >= %s")
+                params.append(start_date)
+
+            if end_date:
+                conditions.append("DATE(created_at) <= %s")
+                params.append(end_date)
+
+            where_clause = "WHERE " + " AND ".join(conditions)
+
+            count_query = f"SELECT COUNT(*) FROM conversations {where_clause}"
+            count_res = await self.db.fetch_one(count_query, tuple(params))
             total = count_res[0] if count_res else 0
 
-            query = """
+            params.append(limit)
+            params.append(offset)
+
+            query = f"""
                 SELECT id, contact_id, metadata, status, mode
                 FROM conversations
-                WHERE contact_id = %s
+                {where_clause}
                 ORDER BY id DESC
                 LIMIT %s OFFSET %s
             """
-            rows = await self.db.fetch_all(query, (contact_id, limit, offset))
+            rows = await self.db.fetch_all(query, tuple(params))
 
             conversations = []
             for cr in rows:
@@ -282,7 +328,7 @@ class OrganizationService:
             )
             raise
 
-    async def get_organization_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+    async def get_organization_by_email(self, email: str) -> GetOrganizationResponse:
         """Get organization by email"""
         try:
             query = "SELECT id, name, email, status, phone_id, created_at, updated_at FROM organizations WHERE email = %s"
@@ -429,7 +475,7 @@ class OrganizationService:
                 params.append(profile_data.name)
 
             if profile_data.password:
-                hashed = self.auth_service.get_password_hash(profile_data.password)
+                hashed = auth_service.get_password_hash(profile_data.password)
                 updates.append("password = %s")
                 params.append(hashed)
 
@@ -467,10 +513,13 @@ class OrganizationService:
             query = """
                 SELECT ou.id, ou.user_id, ou.organization_id, ou.phone_number, ou.role_id, ou.created_at, ou.updated_at,
                        u.name as user_name, u.profile_picture, u.email as user_email,
-                       r.name as role_name
+                       r.name as role_name,
+                       ou.organization_role_id,
+                       or_roles.name as organization_role_name
                 FROM organization_users ou
                 JOIN users u ON ou.user_id = u.id
                 JOIN roles r ON ou.role_id = r.id
+                LEFT JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
                 WHERE ou.organization_id = %s
             """
             rows = await self.db.fetch_all(query, (org_id,))
@@ -487,6 +536,7 @@ class OrganizationService:
                     "organization_id": str(r[2]),
                     "phone_number": r[3],
                     "role": {"id": str(r[4]), "name": r[10]},
+                    "organization_role": {"id": str(r[11]), "name": r[12]} if r[12] else None,
                     "created_at": r[5],
                     "updated_at": r[6],
                 }
@@ -512,7 +562,7 @@ class OrganizationService:
             raise
 
     async def invite_user(
-        self, org_id: str, email: str, role_id: str | None = None
+        self, org_id: str, email: str
     ) -> Optional[Dict[str, Any]]:
         """Invite existing user to organization"""
         try:
@@ -529,18 +579,27 @@ class OrganizationService:
             if await self.db.fetch_one(check_query, (org_id, user_id)):
                 raise ValueError("User is already in this organization")
 
-            role_id = (
-                role_id if role_id else str(await auth_service.get_role_id("user"))
-            )
-            if not role_id:
-                raise ValueError("User role not found")
+            # Get default 'user' role from organization_roles if not specified
+            global_role_id = str(await auth_service.get_role_id("user"))
+            if not global_role_id:
+                raise ValueError("Global user role not found")
+
+            # Get 'user' org role
+            org_role_query = "SELECT id FROM organization_roles WHERE organization_id = %s AND name = 'user'"
+            org_role_res = await self.db.fetch_one(org_role_query, (org_id,))
+            if not org_role_res:
+                # Should have been created by init_org_permission
+                raise ValueError("Organization 'user' role not found")
+            org_role_id = org_role_res[0]
 
             # Insert
             query = """
-                INSERT INTO organization_users (user_id, organization_id, role_id)
-                VALUES (%s, %s, %s)
+                INSERT INTO organization_users (user_id, organization_id, role_id, organization_role_id)
+                VALUES (%s, %s, %s, %s)
             """
-            await self.db.execute(query, (user_id, org_id, role_id))
+            await self.db.execute(
+                query, (user_id, org_id, global_role_id, org_role_id)
+            )
 
             # Return added user info
             return await self.get_organization_user(org_id, str(user_id))
@@ -559,10 +618,12 @@ class OrganizationService:
             query = """
                 SELECT ou.id, ou.user_id, ou.organization_id, ou.role_id, ou.created_at, ou.updated_at,
                        u.name as user_name, u.email as user_email,
-                       r.name as role_name
+                       r.name as role_name,
+                       or_roles.name as org_role_name, or_roles.id as org_role_id
                 FROM organization_users ou
                 JOIN users u ON ou.user_id = u.id
                 JOIN roles r ON ou.role_id = r.id
+                LEFT JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
                 WHERE ou.organization_id = %s AND ou.user_id = %s
             """
             r = await self.db.fetch_one(query, (org_id, user_id))
@@ -571,7 +632,10 @@ class OrganizationService:
                     "id": str(r[0]),
                     "user": {"id": str(r[1]), "name": r[6], "email": r[7]},
                     "organization_id": str(r[2]),
-                    "role": {"id": str(r[3]), "name": r[8]},
+                    "role": {"id": str(r[3]), "name": r[8]},  # Global role
+                    "organization_role": {"id": str(r[10]), "name": r[9]}
+                    if r[10]
+                    else None,
                     "created_at": r[4],
                     "updated_at": r[5],
                 }
@@ -581,12 +645,17 @@ class OrganizationService:
             raise
 
     async def update_user_role(
-        self, org_id: str, user_id: str, role_id: str
+        self, org_id: str, user_id: str, organization_role_id: str
     ) -> Optional[Dict[str, Any]]:
-        """Update user role in organization"""
+        """Update user organization role"""
         try:
-            query = "UPDATE organization_users SET role_id = %s WHERE organization_id = %s AND user_id = %s"
-            await self.db.execute(query, (role_id, org_id, user_id))
+            # Verify role exists in organization
+            check_role = "SELECT id FROM organization_roles WHERE id = %s AND organization_id = %s"
+            if not await self.db.fetch_one(check_role, (organization_role_id, org_id)):
+                raise ValueError("Role does not exist in organization")
+
+            query = "UPDATE organization_users SET organization_role_id = %s WHERE organization_id = %s AND user_id = %s"
+            await self.db.execute(query, (organization_role_id, org_id, user_id))
             return await self.get_organization_user(org_id, user_id)
         except Exception as e:
             logger.error(f"Error updating org user role: {str(e)}", exc_info=True)
@@ -615,17 +684,17 @@ class OrganizationService:
             raise
 
     async def check_is_org_admin(self, org_id: str, user_id: str) -> bool:
-        """Check if user is admin of the organization"""
+        """Check if user is admin of the organization (has 'admin' organization role)"""
         try:
             query = """
                 SELECT 1 
                 FROM organization_users ou
-                JOIN organization_roles or ON ou.organization_role_id = or.id
-                WHERE ou.organization_id = %s AND ou.user_id = %s AND or.name = 'admin'
+                JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
+                WHERE ou.organization_id = %s AND ou.user_id = %s AND or_roles.name = 'admin'
             """
-            result = await self.db.exists(query, (org_id, user_id))
-            
-            return result
+            result = await self.db.fetch_one(query, (org_id, user_id))
+
+            return bool(result)
         except Exception as e:
             logger.error(f"Error checking org admin: {str(e)}")
             return False
@@ -635,19 +704,71 @@ class OrganizationService:
     ) -> bool:
         """Check if organization user has permission"""
         try:
+            # 1. Check if admin role
+            if await self.check_is_org_admin(org_id, user_id):
+                return True
+
+            # 2. Check permission via role
             query = """
                 SELECT 1
                 FROM organization_users ou
-                JOIN organization_roles or ON ou.organization_role_id = or.id
-                JOIN organization_role_permissions orp ON or.id = orp.organization_role_id
+                JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
+                JOIN organization_role_permissions orp ON or_roles.id = orp.organization_role_id
                 JOIN organization_permissions op ON orp.organization_permission_id = op.id
                 WHERE ou.organization_id = %s AND ou.user_id = %s AND op.name = %s
             """
-            result = await self.db.exists(query, (org_id, user_id, permission))
-            return result
+            result = await self.db.fetch_one(query, (org_id, user_id, permission))
+            return bool(result)
         except Exception as e:
-            logger.error(f"Error checking org admin: {str(e)}")
+            logger.error(f"Error checking org permission: {str(e)}")
             return False
+
+    async def get_org_user_role(self, org_id: str, user_id: str) -> str:
+        """Get role for an organization user"""
+        try:
+            is_admin = await self.check_is_org_admin(org_id, user_id)
+
+            if is_admin:
+                return "admin"
+
+            # 2. Get assigned permissions via role
+            query = """
+                SELECT or_roles.name
+                FROM organization_users ou
+                JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
+                WHERE ou.organization_id = %s AND ou.user_id = %s
+            """
+            rows = await self.db.fetch_one(query, (org_id, user_id))
+            return rows[0] if rows else None
+        except Exception as e:
+            logger.error(f"Error getting org user permissions: {str(e)}")
+            raise Exception("Internal server error")
+
+    async def get_org_user_permissions(self, org_id: str, user_id: str) -> List[str]:
+        """Get all permissions for an organization user"""
+        try:
+            is_admin = await self.check_is_org_admin(org_id, user_id)
+
+            if is_admin:
+                # Fetch all permissions from organization_permissions table
+                query_all = "SELECT name FROM organization_permissions"
+                rows = await self.db.fetch_all(query_all)
+                return [r[0] for r in rows]
+
+            # 2. Get assigned permissions via role
+            query = """
+                SELECT op.name
+                FROM organization_users ou
+                JOIN organization_roles or_roles ON ou.organization_role_id = or_roles.id
+                JOIN organization_role_permissions orp ON or_roles.id = orp.organization_role_id
+                JOIN organization_permissions op ON orp.organization_permission_id = op.id
+                WHERE ou.organization_id = %s AND ou.user_id = %s
+            """
+            rows = await self.db.fetch_all(query, (org_id, user_id))
+            return [r[0] for r in rows]
+        except Exception as e:
+            logger.error(f"Error getting org user permissions: {str(e)}")
+            return []
 
     async def check_is_org_member(self, org_id: str, user_id: str) -> bool:
         """Check if user is member of the organization"""
@@ -734,3 +855,28 @@ class OrganizationService:
         except Exception as e:
             logger.error(f"Error getting user organizations: {str(e)}", exc_info=True)
             raise
+
+    async def check_is_app_admin(self, user_id: str) -> bool:
+        try:
+            query = "SELECT r.name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = %s"
+            res = await self.db.fetch_one(query, (user_id,))
+            if res and res[0] == "admin":
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error checking if app admin: {str(e)}", exc_info=True)
+            raise
+        
+    async def get_organization_id_by_conversation_id(self, conversation_id: str) -> str:
+        query = """
+                SELECT o.id
+                FROM organizations o
+                JOIN contacts c ON c.organization_id = o.id
+                JOIN conversations co ON co.contact_id = c.id
+                WHERE co.id = %s
+            """
+        org = await self.db.fetch_one(query, (conversation_id,))
+        if not org:
+            raise ValueError("Organization not found")
+        org_id = org[0]
+        return org_id

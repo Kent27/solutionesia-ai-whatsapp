@@ -34,12 +34,12 @@ CREATE TABLE IF NOT EXISTS organization_permissions (
 CREATE TABLE IF NOT EXISTS organization_role_permissions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     organization_role_id BIGINT NOT NULL,
-    organization_permission_id BIGINT DEFAULT NULL,
+    organization_permission_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (organization_role_id) REFERENCES organization_roles(id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_permission_id) REFERENCES organization_permissions(id) ON DELETE SET NULL
+    FOREIGN KEY (organization_permission_id) REFERENCES organization_permissions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS roles (

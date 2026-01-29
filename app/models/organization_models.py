@@ -156,6 +156,9 @@ class OrganizationUpdateUserPhoneNumber(BaseModel):
 class ConversationFilter(BaseModel):
     mode: Optional[str] = Field(None, pattern="^(human|ai)$")
     status: Optional[str] = Field(None, pattern="^(active|inactive)$")
+    query: Optional[str] = None
+    start_date: Optional[str] = Field(None, description="YYYY-MM-DD")
+    end_date: Optional[str] = Field(None, description="YYYY-MM-DD")
     page: int = 1
     limit: int = 10
 

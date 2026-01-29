@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     metadata JSON,
     mode VARCHAR(50) DEFAULT NULL,
     status VARCHAR(50) DEFAULT 'active',
+    is_opened BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE,
     INDEX idx_conv_status (status)
 );

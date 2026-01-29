@@ -1,3 +1,5 @@
+from app.services.organization_permission_service import OrganizationPermissionService
+from app.services.organization_service import OrganizationService
 import os
 from typing import Optional, Dict, Any, List
 from ..database.mysql import MariaDBClient
@@ -32,27 +34,56 @@ class ConversationService:
     ) -> bool:
         """Verify if a user has access to a conversation (Org Member OR App Admin)"""
         try:
-            # 1. Check if user is App Admin
-            admin_query = """
-                SELECT 1 
-                FROM users u
-                JOIN roles r ON u.role_id = r.id
-                WHERE u.id = %s AND r.name = 'admin'
+            org_service = OrganizationService()
+
+            org_id = await org_service.get_organization_id_by_conversation_id(
+                conversation_id
+            )
+            is_org_user = await org_service.check_is_org_member(org_id, user_id)
+
+            return is_org_user
+        except Exception as e:
+            logger.error(
+                f"Error verification conversation access: {str(e)}", exc_info=True
+            )
+            return False
+
+    async def can_be_opened(self, conversation_id: str) -> bool:
+        """Get or create conversation by contact id and status 'active'"""
+        try:
+            # Check if contact exists for the organization
+            conversation_query = """
+                SELECT 1
+                FROM conversations 
+                WHERE conversations.id = %s AND conversations.status = 'active' AND conversations.mode = 'human' and conversations.is_opened = false
             """
-            is_admin = await self.db.fetch_one(admin_query, (user_id,))
-            if is_admin:
+            conversation = await self.db.exists(conversation_query, (conversation_id,))
+
+            return conversation
+        except Exception as e:
+            logger.error(f"Error getting conversation: {str(e)}", exc_info=True)
+            raise
+
+    async def can_open_conversation(self, conversation_id: str, user_id: str) -> bool:
+        """Verify if a user has access to a conversation (Org Admin or Org User with 'takeover' permission)"""
+        try:
+            org_service = OrganizationService()
+            org_permission_service = OrganizationPermissionService()
+
+            org_id = await org_service.get_organization_id_by_conversation_id(
+                conversation_id
+            )
+
+            is_org_admin = await org_service.check_is_org_admin(org_id, user_id)
+            if is_org_admin:
                 return True
 
-            # 2. Check if user is part of the organization that owns the contact of the conversation
-            query = """
-                SELECT 1
-                FROM conversations conv
-                JOIN contacts c ON conv.contact_id = c.id
-                JOIN organization_users ou ON c.organization_id = ou.organization_id
-                WHERE conv.id = %s AND ou.user_id = %s
-            """
-            result = await self.db.fetch_one(query, (conversation_id, user_id))
-            return True if result else False
+            is_org_user = await org_service.check_is_org_member(org_id, user_id)
+            permitted = await org_permission_service.check_org_permission(
+                org_id, user_id, "takeover"
+            )
+
+            return is_org_user and permitted
         except Exception as e:
             logger.error(
                 f"Error verification conversation access: {str(e)}", exc_info=True
@@ -172,7 +203,33 @@ class ConversationService:
                 WHERE id = %s
             """
             await self.db.execute(update_query, (mode, id))
+
+            # Mark chat as 'new' on 'human' mode
+            # otherwise, mark as 'always read' on 'ai' mode
+            # FE needs to notify the 'opened' status back
+            await self.update_conversation_open_status(id, False)
+
             logger.info(f"Conversation mode updated to {mode} for conversation {id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
+            raise Exception("Failed to update conversation mode")
+
+    async def update_conversation_open_status(
+        self, id: str, is_opened: bool = True
+    ) -> bool:
+        """Update conversation open status"""
+        try:
+            update_query = """
+                UPDATE conversations 
+                SET is_opened = %s 
+                WHERE id = %s
+            """
+            await self.db.execute(update_query, (is_opened, id))
+
+            logger.info(
+                f"Conversation open status updated to {str(is_opened)} for conversation {id}"
+            )
             return True
         except Exception as e:
             logger.error(f"Error updating conversation mode: {str(e)}", exc_info=True)
